@@ -175,45 +175,38 @@
       padding-top: clamp(88px, 13vh, 140px);
     }
 
-    /* Бегущая строка с англоязычным отрывком */
+    /*
+      Полоса светло-серая в центре и плавно становится белой
+      по краям, сливаясь с фоном страницы.
+    */
     .ticker {
+      --ticker-edge-width: clamp(58px, 11vw, 122px);
+
+      position: relative;
+      isolation: isolate;
       width: 100%;
-      min-height: 48px;
+      min-height: 49px;
       margin-bottom: 18px;
       overflow: hidden;
-      background: #f5f5f7;
+      background: linear-gradient(
+        to right,
+        #ffffff 0%,
+        #f5f5f7 11%,
+        #f5f5f7 89%,
+        #ffffff 100%
+      );
     }
 
     .ticker__viewport {
+      position: relative;
       width: 100%;
+      min-height: 49px;
       overflow: hidden;
-
-      /* Плавно скрываем текст у левого и правого краёв */
-      -webkit-mask-image: linear-gradient(
-        to right,
-        transparent 0%,
-        rgba(0, 0, 0, 0.32) 3%,
-        #000 10%,
-        #000 90%,
-        rgba(0, 0, 0, 0.32) 97%,
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        to right,
-        transparent 0%,
-        rgba(0, 0, 0, 0.32) 3%,
-        #000 10%,
-        #000 90%,
-        rgba(0, 0, 0, 0.32) 97%,
-        transparent 100%
-      );
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-size: 100% 100%;
-      mask-size: 100% 100%;
     }
 
     .ticker__track {
+      position: relative;
+      z-index: 1;
       display: flex;
       width: max-content;
       animation: ticker-scroll var(--ticker-duration, 60s) linear infinite;
@@ -224,50 +217,113 @@
       display: flex;
       flex: 0 0 auto;
       align-items: center;
-      gap: 18px;
-      padding: 14px 24px;
+      gap: 22px;
+      padding: 15px 24px;
       white-space: nowrap;
     }
 
-    .ticker__excerpt {
-      color: #6e6e73;
+    .ticker__text {
+      color: #5f5f64;
       font-size: 13px;
       font-weight: 400;
+      line-height: 1.45;
       letter-spacing: -0.01em;
     }
 
-    .ticker__credit {
-      display: inline-flex;
+    .ticker__separator {
       flex: none;
-      align-items: center;
-      gap: 7px;
-      color: #86868b;
-      font-size: 11px;
-      white-space: nowrap;
+      color: #a1a1a6;
+      font-size: 13px;
+      line-height: 1;
     }
 
-    .ticker__source,
-    .ticker__license {
-      color: inherit;
-      font-size: inherit;
-      font-weight: 400;
-      text-decoration: none;
+    /*
+      Каждый край состоит из нескольких полупрозрачных слоёв:
+      мягкий blur, средний blur и более сильный blur у самого края.
+    */
+    .ticker__edge {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      bottom: 0;
+      width: var(--ticker-edge-width);
+      pointer-events: none;
+      --edge-direction: to right;
     }
 
-    .ticker__source:hover,
-    .ticker__license:hover {
-      text-decoration: underline;
-      text-underline-offset: 3px;
+    .ticker__edge--left {
+      left: 0;
     }
 
-    .ticker__status {
-      color: #86868b;
-      font-size: 12px;
+    .ticker__edge--right {
+      right: 0;
+      --edge-direction: to left;
+    }
+
+    .ticker__blur-band {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: var(--band-width);
+      z-index: var(--band-layer);
+
+      background: linear-gradient(
+        var(--edge-direction),
+        rgba(255, 255, 255, var(--veil)) 0%,
+        rgba(255, 255, 255, 0) 100%
+      );
+
+      -webkit-backdrop-filter: blur(var(--blur));
+      backdrop-filter: blur(var(--blur));
+
+      -webkit-mask-image: linear-gradient(
+        var(--edge-direction),
+        #000 0%,
+        rgba(0, 0, 0, 0.72) 52%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        var(--edge-direction),
+        #000 0%,
+        rgba(0, 0, 0, 0.72) 52%,
+        transparent 100%
+      );
+    }
+
+    .ticker__blur-band--soft {
+      --band-width: 100%;
+      --band-layer: 1;
+      --blur: 1px;
+      --veil: 0.12;
+    }
+
+    .ticker__blur-band--medium {
+      --band-width: 68%;
+      --band-layer: 2;
+      --blur: 2.8px;
+      --veil: 0.22;
+    }
+
+    .ticker__blur-band--strong {
+      --band-width: 40%;
+      --band-layer: 3;
+      --blur: 5px;
+      --veil: 0.52;
+    }
+
+    .ticker__edge--right .ticker__blur-band {
+      right: 0;
+      left: auto;
     }
 
     .ticker--static .ticker__track {
-      width: 100%;
       animation: none;
+      transform: none;
+    }
+
+    .ticker:hover .ticker__track {
+      animation-play-state: paused;
     }
 
     .footer-image {
@@ -288,17 +344,7 @@
       }
     }
 
-    .ticker:hover .ticker__track,
-    .ticker:focus-within .ticker__track {
-      animation-play-state: paused;
-    }
-
     @media (prefers-reduced-motion: reduce) {
-      .ticker__viewport {
-        -webkit-mask-image: none;
-        mask-image: none;
-      }
-
       .ticker__track {
         width: 100%;
         animation: none;
@@ -313,18 +359,16 @@
         width: 100%;
         flex-basis: 100%;
         flex-wrap: wrap;
-        gap: 8px 14px;
         padding-block: 14px;
         white-space: normal;
       }
 
-      .ticker__excerpt {
+      .ticker__text {
         white-space: normal;
       }
 
-      .ticker__credit {
-        flex-wrap: wrap;
-        white-space: normal;
+      .ticker__edge {
+        display: none;
       }
     }
 
@@ -411,21 +455,34 @@
         class="ticker ticker--static"
         id="reading-ticker"
         role="region"
-        aria-label="Случайный отрывок на английском"
-        aria-busy="true"
+        aria-label="Короткий английский текст для практики"
       >
-        <div class="ticker__viewport">
+        <div class="ticker__viewport" id="ticker-viewport">
           <div class="ticker__track" id="ticker-track">
             <div class="ticker__group">
-              <span class="ticker__status">Loading an English excerpt…</span>
+              <span class="ticker__text">
+                Small moments can lead to better conversations.
+              </span>
             </div>
+          </div>
+
+          <div class="ticker__edge ticker__edge--left" aria-hidden="true">
+            <span class="ticker__blur-band ticker__blur-band--soft"></span>
+            <span class="ticker__blur-band ticker__blur-band--medium"></span>
+            <span class="ticker__blur-band ticker__blur-band--strong"></span>
+          </div>
+
+          <div class="ticker__edge ticker__edge--right" aria-hidden="true">
+            <span class="ticker__blur-band ticker__blur-band--soft"></span>
+            <span class="ticker__blur-band ticker__blur-band--medium"></span>
+            <span class="ticker__blur-band ticker__blur-band--strong"></span>
           </div>
         </div>
       </section>
 
       <img
         class="footer-image"
-        src="./public/footer.png?v=5"
+        src="./public/footer.png?v=6"
         alt=""
       />
     </footer>
@@ -509,27 +566,49 @@
       navigation.append(group);
     });
 
+    // Оригинальные короткие истории для прототипа.
+    // При каждом открытии страницы выбираются случайная история
+    // и случайный абзац, чаще второй или третий.
+    const readingStories = [
+      [
+        "When Maya moved to a new city, she decided to walk home from work instead of taking the bus.",
+        "At first, she used the same quiet street every day. One evening, she noticed a small bookstore with a handwritten sign in the window. It said, “Tell us what you’re reading.”",
+        "The next day, Maya went inside and asked the owner for a recommendation. They talked about mystery novels, favorite characters, and the best places to get coffee nearby.",
+        "Maya left with a book and three new places to visit. Her English wasn’t perfect, but the conversation felt easy.",
+      ],
+      [
+        "On Saturday mornings, Ben liked to visit the farmers market before it got busy.",
+        "One weekend, he stopped at a table full of fresh peaches. The seller asked if he wanted to try one, and Ben said yes. It was sweeter than he expected.",
+        "He asked how the peaches were grown and learned that the farm was just outside town. The seller also shared a simple recipe for peach pie.",
+        "Ben bought a small bag and went home smiling. He had practiced English, learned something new, and found dessert for the evening.",
+      ],
+      [
+        "Olivia was nervous about joining her first neighborhood book club.",
+        "She almost stayed home, but she had already finished the book, so she went. The group was smaller than she expected, and everyone took turns sharing one thing they liked.",
+        "When it was Olivia’s turn, she talked about the main character and asked the others what they thought. A woman across the table agreed and added an idea Olivia hadn’t considered.",
+        "By the end of the evening, Olivia had shared her opinion and made plans to come back. She realized a good conversation often starts with one simple question.",
+      ],
+      [
+        "A few months ago, Daniel started taking a different route to the office.",
+        "The new street was a little longer, but it passed a quiet park. Most mornings, he saw an older man feeding birds near the fountain.",
+        "One day, Daniel asked what kind of birds they were. The man told him their names and pointed out a bright red cardinal in a tree. Daniel listened, then asked how long the birds had visited the park.",
+        "Now Daniel leaves home ten minutes earlier. The walk gives him fresh air and a small daily conversation to look forward to.",
+      ],
+    ];
+
     const ticker = document.querySelector("#reading-ticker");
+    const tickerViewport = document.querySelector("#ticker-viewport");
     const tickerTrack = document.querySelector("#ticker-track");
 
-    const wikipediaApi = "https://simple.wikipedia.org/w/api.php";
-    const wikipediaLicense =
-      "https://creativecommons.org/licenses/by-sa/4.0/";
-
-    function splitIntoParagraphs(extract) {
-      return extract
-        .replace(/\r/g, "")
-        .split(/\n+/)
-        .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
-        .filter((paragraph) => paragraph.length >= 50);
-    }
+    const reducedMotionQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
 
     function chooseStartingParagraph(paragraphCount) {
       if (paragraphCount <= 1) {
         return 0;
       }
 
-      // Чаще начинаем со второго или третьего абзаца.
       const preferredParagraphs = [1, 2].filter(
         (index) => index < paragraphCount
       );
@@ -548,7 +627,7 @@
       return Math.floor(Math.random() * paragraphCount);
     }
 
-    function limitExcerpt(text, maxLength = 360) {
+    function limitExcerpt(text, maxLength = 420) {
       if (text.length <= maxLength) {
         return text;
       }
@@ -561,7 +640,7 @@
       );
 
       if (lastSentenceEnd > maxLength * 0.55) {
-        return `${beginning.slice(0, lastSentenceEnd + 1).trim()}…`;
+        return beginning.slice(0, lastSentenceEnd + 1).trim();
       }
 
       const lastSpace = beginning.lastIndexOf(" ");
@@ -571,211 +650,97 @@
     }
 
     function makeExcerpt(paragraphs, startIndex) {
-      const selectedParagraphs = [];
-      let characterCount = 0;
+      const text = paragraphs
+        .slice(startIndex)
+        .join(" ");
 
-      for (
-        let index = startIndex;
-        index < paragraphs.length && characterCount < 360;
-        index += 1
-      ) {
-        selectedParagraphs.push(paragraphs[index]);
-        characterCount += paragraphs[index].length + 1;
-      }
-
-      return limitExcerpt(selectedParagraphs.join(" "));
+      return limitExcerpt(text);
     }
 
-    function createTickerGroup({
-      title,
-      pageUrl,
-      excerpt,
-      duplicate,
-    }) {
+    function createTextItem(text) {
+      const item = document.createElement("span");
+      item.className = "ticker__text";
+      item.textContent = text;
+      return item;
+    }
+
+    function appendTickerCopy(group, text, addSeparator) {
+      if (addSeparator) {
+        const separator = document.createElement("span");
+        separator.className = "ticker__separator";
+        separator.setAttribute("aria-hidden", "true");
+        separator.textContent = "·";
+        group.append(separator);
+      }
+
+      group.append(createTextItem(text));
+    }
+
+    function createTickerGroup(text, isDuplicate = false) {
       const group = document.createElement("div");
       group.className = "ticker__group";
 
-      if (duplicate) {
+      if (isDuplicate) {
         group.setAttribute("aria-hidden", "true");
       }
 
-      const excerptText = document.createElement("span");
-      excerptText.className = "ticker__excerpt";
-      excerptText.textContent = excerpt;
-
-      const credit = document.createElement("span");
-      credit.className = "ticker__credit";
-
-      const sourceName = document.createElement("span");
-      sourceName.textContent = "Source: Simple English Wikipedia";
-
-      const sourceLink = document.createElement("a");
-      sourceLink.className = "ticker__source";
-      sourceLink.href = pageUrl;
-      sourceLink.target = "_blank";
-      sourceLink.rel = "noopener noreferrer";
-      sourceLink.textContent = title;
-      sourceLink.setAttribute(
-        "aria-label",
-        `Read “${title}” on Simple English Wikipedia`
-      );
-
-      const separator = document.createElement("span");
-      separator.setAttribute("aria-hidden", "true");
-      separator.textContent = "·";
-
-      const licenseLink = document.createElement("a");
-      licenseLink.className = "ticker__license";
-      licenseLink.href = wikipediaLicense;
-      licenseLink.target = "_blank";
-      licenseLink.rel = "noopener noreferrer";
-      licenseLink.textContent = "CC BY-SA 4.0";
-      licenseLink.setAttribute(
-        "aria-label",
-        "Content license: Creative Commons Attribution-ShareAlike 4.0"
-      );
-
-      if (duplicate) {
-        sourceLink.tabIndex = -1;
-        licenseLink.tabIndex = -1;
-      }
-
-      credit.append(
-        sourceName,
-        sourceLink,
-        separator,
-        licenseLink
-      );
-
-      // Отрывок идёт первым, атрибуция — в конце.
-      group.append(excerptText, credit);
-
+      appendTickerCopy(group, text, false);
       return group;
     }
 
-    function showTickerStatus(message) {
+    function renderTickerText(text) {
       tickerTrack.replaceChildren();
-
-      const group = document.createElement("div");
-      group.className = "ticker__group";
-
-      const status = document.createElement("span");
-      status.className = "ticker__status";
-      status.textContent = message;
-
-      group.append(status);
-      tickerTrack.append(group);
-
       ticker.classList.add("ticker--static");
-      ticker.setAttribute("aria-busy", "false");
-    }
 
-    function showTickerArticle({ title, pageUrl, excerpt }) {
-      tickerTrack.replaceChildren();
+      const firstGroup = createTickerGroup(text);
+      tickerTrack.append(firstGroup);
 
-      tickerTrack.append(
-        createTickerGroup({
-          title,
-          pageUrl,
-          excerpt,
-          duplicate: false,
-        }),
-        createTickerGroup({
-          title,
-          pageUrl,
-          excerpt,
-          duplicate: true,
-        })
-      );
+      // Если короткий отрывок не заполняет всю ширину,
+      // повторяем его, чтобы анимация шла без пустых промежутков.
+      if (!reducedMotionQuery.matches) {
+        let copyCount = 1;
+        const minimumWidth = tickerViewport.clientWidth + 100;
 
-      ticker.classList.remove("ticker--static");
-      ticker.setAttribute("aria-busy", "false");
-      ticker.setAttribute(
-        "aria-label",
-        `English excerpt from Simple English Wikipedia: ${title}`
-      );
-
-      requestAnimationFrame(() => {
-        const firstGroup = tickerTrack.querySelector(".ticker__group");
-
-        if (!firstGroup) {
-          return;
+        while (
+          firstGroup.scrollWidth < minimumWidth &&
+          copyCount < 8
+        ) {
+          appendTickerCopy(firstGroup, text, true);
+          copyCount += 1;
         }
 
-        const pixelsPerSecond = 34;
-        const duration = Math.max(
-          45,
-          firstGroup.getBoundingClientRect().width / pixelsPerSecond
-        );
+        const duplicateGroup = firstGroup.cloneNode(true);
+        duplicateGroup.setAttribute("aria-hidden", "true");
+        tickerTrack.append(duplicateGroup);
 
-        tickerTrack.style.setProperty(
-          "--ticker-duration",
-          `${duration.toFixed(1)}s`
-        );
-      });
-    }
+        requestAnimationFrame(() => {
+          const groupWidth = firstGroup.getBoundingClientRect().width;
+          const pixelsPerSecond = 30;
+          const duration = Math.max(42, groupWidth / pixelsPerSecond);
 
-    async function loadRandomEnglishExcerpt() {
-      try {
-        const params = new URLSearchParams({
-          action: "query",
-          generator: "random",
-          grnnamespace: "0",
-          grnlimit: "1",
-          prop: "extracts",
-          explaintext: "1",
-          exchars: "8000",
-          format: "json",
-          formatversion: "2",
-          origin: "*",
-        });
-
-        const response = await fetch(
-          `${wikipediaApi}?${params.toString()}`,
-          { cache: "no-store" }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Wikipedia API returned ${response.status}`
+          tickerTrack.style.setProperty(
+            "--ticker-duration",
+            `${duration.toFixed(1)}s`
           );
-        }
 
-        const data = await response.json();
-        const pages = data?.query?.pages;
-
-        const page = Array.isArray(pages)
-          ? pages[0]
-          : Object.values(pages ?? {})[0];
-
-        if (!page?.extract || !page?.pageid) {
-          throw new Error("The random article has no readable text.");
-        }
-
-        const paragraphs = splitIntoParagraphs(page.extract);
-
-        if (paragraphs.length === 0) {
-          throw new Error("Could not find paragraphs in the article.");
-        }
-
-        const startIndex = chooseStartingParagraph(paragraphs.length);
-        const excerpt = makeExcerpt(paragraphs, startIndex);
-
-        showTickerArticle({
-          title: page.title,
-          pageUrl: `https://simple.wikipedia.org/?curid=${page.pageid}`,
-          excerpt,
+          ticker.classList.remove("ticker--static");
         });
-      } catch (error) {
-        console.error("Could not load the English excerpt:", error);
-
-        showTickerStatus(
-          "The English excerpt could not be loaded. Try refreshing the page."
-        );
       }
     }
 
-    loadRandomEnglishExcerpt();
+    function renderRandomStory() {
+      const storyIndex = Math.floor(
+        Math.random() * readingStories.length
+      );
+
+      const story = readingStories[storyIndex];
+      const startIndex = chooseStartingParagraph(story.length);
+      const excerpt = makeExcerpt(story, startIndex);
+
+      renderTickerText(excerpt);
+    }
+
+    renderRandomStory();
   </script>
 </body>
 </html>
