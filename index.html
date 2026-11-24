@@ -62,8 +62,8 @@
 
     .site-main {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
-      column-gap: clamp(44px, 5vw, 58px);
+      grid-template-columns: minmax(0, 1fr) 320px;
+      column-gap: clamp(40px, 5vw, 64px);
       align-items: start;
     }
 
@@ -106,10 +106,10 @@
 
     .site-navigation {
       display: grid;
-      width: min(100%, 500px);
+      width: 320px;
+      justify-self: end;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      column-gap: 8px;
-      margin-left: auto;
+      column-gap: 2px;
     }
 
     .menu-column {
@@ -199,8 +199,8 @@
       }
 
       .site-navigation {
-        width: min(100%, 500px);
-        margin-left: 0;
+        width: min(100%, 320px);
+        justify-self: start;
       }
     }
 
@@ -216,9 +216,8 @@
 
       .site-navigation {
         width: 100%;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        row-gap: 32px;
-        column-gap: 24px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        column-gap: 2px;
       }
 
       .brand-logo {
@@ -241,11 +240,7 @@
     <main class="site-main" id="top">
       <section class="brand-block" aria-label="О Fluent">
         <a class="brand" href="./" aria-label="Fluent — главная страница">
-          <img
-            class="brand-logo"
-            src="./public/fluent.png"
-            alt="Fluent"
-          />
+          <img class="brand-logo" src="./public/fluent.png" alt="Fluent" />
         </a>
 
         <h1 class="tagline">
@@ -254,36 +249,18 @@
         </h1>
       </section>
 
-      <nav
-        class="site-navigation"
-        id="site-navigation"
-        aria-label="Основные разделы"
-      ></nav>
+      <nav class="site-navigation" id="site-navigation" aria-label="Основные разделы"></nav>
     </main>
 
     <footer class="site-footer">
-      <img
-        class="footer-image"
-        src="./public/footer.png"
-        alt=""
-      />
+      <!-- v=2 — версия против кэша. При смене картинки увеличь число -->
+      <img class="footer-image" src="./public/footer.png?v=2" alt="" />
     </footer>
   </div>
 
   <script>
-    const practiceItems = [
-      "Заглушка",
-      "Ещё одна",
-      "Заглушка",
-      "Ещё одна",
-    ];
-
-    const optionsItems = [
-      "Заглушка",
-      "Ещё одна",
-      "Заглушка",
-    ];
-
+    const practiceItems = ["Заглушка", "Ещё одна", "Заглушка", "Ещё одна"];
+    const optionsItems = ["Заглушка", "Ещё одна", "Заглушка"];
     const socialItems = [
       { label: "GitHub", arrow: true },
       { label: "Telegram", arrow: true },
@@ -305,17 +282,13 @@
       heading.className = "menu-heading";
       heading.id = `menu-heading-${index}`;
       heading.textContent = column.title;
-
       group.setAttribute("aria-labelledby", heading.id);
 
       const list = document.createElement("ul");
       list.className = "menu-list";
 
       column.items.forEach((item) => {
-        const entry = typeof item === "string"
-          ? { label: item }
-          : item;
-
+        const entry = typeof item === "string" ? { label: item } : item;
         const listItem = document.createElement("li");
         const link = document.createElement("a");
 
