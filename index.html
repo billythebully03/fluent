@@ -109,7 +109,7 @@
       width: 320px;
       justify-self: end;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      column-gap: 2px;
+      column-gap: 10px;
     }
 
     .menu-column {
@@ -175,12 +175,88 @@
       padding-top: clamp(88px, 13vh, 140px);
     }
 
+    /* Ненавязчивая строка над изображением */
+    .ticker {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 46px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(29, 29, 31, 0.04);
+      border-radius: 12px;
+      background: #f5f5f7;
+    }
+
+    .ticker__track {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      height: 100%;
+      animation: ticker-scroll 34s linear infinite;
+      will-change: transform;
+    }
+
+    .ticker__group {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 20px;
+      padding-inline: 24px;
+      white-space: nowrap;
+    }
+
+    .ticker__item {
+      color: #515154;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.075em;
+      text-transform: uppercase;
+    }
+
+    .ticker__separator {
+      color: #a1a1a6;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    @keyframes ticker-scroll {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
     .footer-image {
       display: block;
       width: 100%;
       max-width: 100%;
       height: auto;
       margin-inline: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ticker__track {
+        width: 100%;
+        animation: none;
+      }
+
+      .ticker__group[aria-hidden="true"] {
+        display: none;
+      }
+
+      .ticker__group:first-child {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .ticker__group:first-child .ticker__separator,
+      .ticker__group:first-child .ticker__item:not(:first-of-type) {
+        display: none;
+      }
     }
 
     @media (max-width: 920px) {
@@ -217,7 +293,7 @@
       .site-navigation {
         width: 100%;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        column-gap: 2px;
+        column-gap: 10px;
       }
 
       .brand-logo {
@@ -240,7 +316,11 @@
     <main class="site-main" id="top">
       <section class="brand-block" aria-label="О Fluent">
         <a class="brand" href="./" aria-label="Fluent — главная страница">
-          <img class="brand-logo" src="./public/fluent.png" alt="Fluent" />
+          <img
+            class="brand-logo"
+            src="./public/fluent.png"
+            alt="Fluent"
+          />
         </a>
 
         <h1 class="tagline">
@@ -249,18 +329,45 @@
         </h1>
       </section>
 
-      <nav class="site-navigation" id="site-navigation" aria-label="Основные разделы"></nav>
+      <nav
+        class="site-navigation"
+        id="site-navigation"
+        aria-label="Основные разделы"
+      ></nav>
     </main>
 
     <footer class="site-footer">
-      <!-- v=2 — версия против кэша. При смене картинки увеличь число -->
-      <img class="footer-image" src="./public/footer.png?v=2" alt="" />
+      <div
+        class="ticker"
+        id="ticker"
+        role="group"
+        aria-label="Идеи для практики английского"
+      >
+        <div class="ticker__track" id="ticker-track"></div>
+      </div>
+
+      <img
+        class="footer-image"
+        src="./public/footer.png?v=3"
+        alt=""
+      />
     </footer>
   </div>
 
   <script>
-    const practiceItems = ["Заглушка", "Ещё одна", "Заглушка", "Ещё одна"];
-    const optionsItems = ["Заглушка", "Ещё одна", "Заглушка"];
+    const practiceItems = [
+      "Заглушка",
+      "Ещё одна",
+      "Заглушка",
+      "Ещё одна",
+    ];
+
+    const optionsItems = [
+      "Заглушка",
+      "Ещё одна",
+      "Заглушка",
+    ];
+
     const socialItems = [
       { label: "GitHub", arrow: true },
       { label: "Telegram", arrow: true },
@@ -282,13 +389,17 @@
       heading.className = "menu-heading";
       heading.id = `menu-heading-${index}`;
       heading.textContent = column.title;
+
       group.setAttribute("aria-labelledby", heading.id);
 
       const list = document.createElement("ul");
       list.className = "menu-list";
 
       column.items.forEach((item) => {
-        const entry = typeof item === "string" ? { label: item } : item;
+        const entry = typeof item === "string"
+          ? { label: item }
+          : item;
+
         const listItem = document.createElement("li");
         const link = document.createElement("a");
 
@@ -314,6 +425,43 @@
       group.append(heading, list);
       navigation.append(group);
     });
+
+    // Один и тот же набор фраз выводится дважды,
+    // чтобы анимация могла зацикливаться без скачка.
+    const tickerPhrases = [
+      "Think in English",
+      "Learn phrases in context",
+      "Express your ideas",
+      "Practice at your own pace",
+    ];
+
+    const tickerTrack = document.querySelector("#ticker-track");
+
+    for (let copy = 0; copy < 2; copy += 1) {
+      const group = document.createElement("div");
+      group.className = "ticker__group";
+
+      if (copy === 1) {
+        group.setAttribute("aria-hidden", "true");
+      }
+
+      tickerPhrases.forEach((phrase, index) => {
+        if (index > 0) {
+          const separator = document.createElement("span");
+          separator.className = "ticker__separator";
+          separator.setAttribute("aria-hidden", "true");
+          separator.textContent = "·";
+          group.append(separator);
+        }
+
+        const item = document.createElement("span");
+        item.className = "ticker__item";
+        item.textContent = phrase;
+        group.append(item);
+      });
+
+      tickerTrack.append(group);
+    }
   </script>
 </body>
 </html>
