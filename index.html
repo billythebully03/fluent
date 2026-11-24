@@ -30,11 +30,13 @@
     html {
       min-height: 100%;
       background: var(--background);
+      scrollbar-gutter: stable;
     }
 
     body {
       min-height: 100%;
       margin: 0;
+      overflow-x: clip;
       background: var(--background);
       color: var(--text-primary);
       font-family:
@@ -50,6 +52,12 @@
       text-rendering: optimizeLegibility;
     }
 
+    img {
+      -webkit-user-drag: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
     .page-shell {
       display: flex;
       flex-direction: column;
@@ -62,8 +70,8 @@
 
     .site-main {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 460px;
-      column-gap: clamp(40px, 5vw, 64px);
+      grid-template-columns: minmax(0, 1fr) 650px;
+      column-gap: clamp(32px, 4vw, 44px);
       align-items: start;
     }
 
@@ -106,9 +114,9 @@
 
     .site-navigation {
       display: grid;
-      width: 460px;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      column-gap: 24px;
+      width: 650px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      column-gap: 18px;
       justify-self: end;
     }
 
@@ -139,6 +147,7 @@
       align-items: center;
       gap: 7px;
       width: fit-content;
+      max-width: 100%;
       color: var(--text-menu);
       font-size: 14px;
       font-weight: 400;
@@ -163,6 +172,11 @@
       border-radius: 2px;
     }
 
+    .menu-link__label {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
     .menu-arrow {
       flex: none;
       font-size: 12px;
@@ -176,8 +190,8 @@
     }
 
     /*
-      Полоса светло-серая в центре и плавно становится белой
-      по краям, сливаясь с фоном страницы.
+      Центральная часть бегущей строки слегка серая,
+      края постепенно сливаются с белым фоном сайта.
     */
     .ticker {
       --ticker-edge-width: clamp(58px, 11vw, 122px);
@@ -185,7 +199,7 @@
       position: relative;
       isolation: isolate;
       width: 100%;
-      min-height: 49px;
+      height: 52px;
       margin-bottom: 18px;
       overflow: hidden;
       background: linear-gradient(
@@ -195,30 +209,55 @@
         #f5f5f7 89%,
         #ffffff 100%
       );
+      contain: layout paint;
     }
 
     .ticker__viewport {
       position: relative;
+      z-index: 1;
       width: 100%;
-      min-height: 49px;
-      overflow: hidden;
+      height: 52px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      scroll-behavior: auto;
+      touch-action: pan-x;
+      cursor: grab;
+    }
+
+    .ticker__viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ticker__viewport.is-dragging {
+      cursor: grabbing;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .ticker__viewport:focus-visible {
+      outline: 2px solid var(--apple-blue);
+      outline-offset: -2px;
     }
 
     .ticker__track {
-      position: relative;
-      z-index: 1;
       display: flex;
       width: max-content;
-      animation: ticker-scroll var(--ticker-duration, 60s) linear infinite;
-      will-change: transform;
+      min-width: max-content;
+      height: 100%;
+      align-items: stretch;
+      will-change: scroll-position;
     }
 
     .ticker__group {
       display: flex;
       flex: 0 0 auto;
       align-items: center;
-      gap: 22px;
-      padding: 15px 24px;
+      gap: 18px;
+      height: 100%;
+      padding-inline: 24px;
       white-space: nowrap;
     }
 
@@ -228,6 +267,7 @@
       font-weight: 400;
       line-height: 1.45;
       letter-spacing: -0.01em;
+      white-space: nowrap;
     }
 
     .ticker__separator {
@@ -238,12 +278,12 @@
     }
 
     /*
-      Каждый край состоит из нескольких полупрозрачных слоёв:
-      мягкий blur, средний blur и более сильный blur у самого края.
+      Мягкие наложения по краям: фон белеет, а текст размывается.
+      Каждый следующий слой сильнее предыдущего.
     */
     .ticker__edge {
       position: absolute;
-      z-index: 2;
+      z-index: 3;
       top: 0;
       bottom: 0;
       width: var(--ticker-edge-width);
@@ -265,18 +305,15 @@
       top: 0;
       bottom: 0;
       left: 0;
-      width: var(--band-width);
       z-index: var(--band-layer);
-
+      width: var(--band-width);
       background: linear-gradient(
         var(--edge-direction),
         rgba(255, 255, 255, var(--veil)) 0%,
         rgba(255, 255, 255, 0) 100%
       );
-
       -webkit-backdrop-filter: blur(var(--blur));
       backdrop-filter: blur(var(--blur));
-
       -webkit-mask-image: linear-gradient(
         var(--edge-direction),
         #000 0%,
@@ -317,15 +354,6 @@
       left: auto;
     }
 
-    .ticker--static .ticker__track {
-      animation: none;
-      transform: none;
-    }
-
-    .ticker:hover .ticker__track {
-      animation-play-state: paused;
-    }
-
     .footer-image {
       display: block;
       width: 100%;
@@ -334,47 +362,9 @@
       margin-inline: auto;
     }
 
-    @keyframes ticker-scroll {
-      from {
-        transform: translateX(0);
-      }
-
-      to {
-        transform: translateX(-50%);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .ticker__track {
-        width: 100%;
-        animation: none;
-        transform: none;
-      }
-
-      .ticker__group[aria-hidden="true"] {
-        display: none;
-      }
-
-      .ticker__group:first-child {
-        width: 100%;
-        flex-basis: 100%;
-        flex-wrap: wrap;
-        padding-block: 14px;
-        white-space: normal;
-      }
-
-      .ticker__text {
-        white-space: normal;
-      }
-
-      .ticker__edge {
-        display: none;
-      }
-    }
-
-    @media (max-width: 920px) {
+    @media (max-width: 1080px) {
       .page-shell {
-        width: min(760px, calc(100% - 64px));
+        width: min(920px, calc(100% - 64px));
         padding-top: 62px;
       }
 
@@ -388,7 +378,7 @@
       }
 
       .site-navigation {
-        width: min(100%, 460px);
+        width: min(100%, 650px);
         justify-self: start;
       }
     }
@@ -421,6 +411,21 @@
       .site-footer {
         padding-top: 84px;
       }
+
+      .ticker {
+        --ticker-edge-width: 52px;
+      }
+
+      .ticker__group {
+        gap: 14px;
+        padding-inline: 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ticker__edge {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -434,6 +439,7 @@
             class="brand-logo"
             src="./public/fluent.png"
             alt="Fluent"
+            draggable="false"
           />
         </a>
 
@@ -454,10 +460,15 @@
       <section
         class="ticker ticker--static"
         id="reading-ticker"
-        role="region"
         aria-label="Короткий английский текст для практики"
       >
-        <div class="ticker__viewport" id="ticker-viewport">
+        <div
+          class="ticker__viewport"
+          id="ticker-viewport"
+          tabindex="0"
+          role="region"
+          aria-label="Прокручиваемый английский текст"
+        >
           <div class="ticker__track" id="ticker-track">
             <div class="ticker__group">
               <span class="ticker__text">
@@ -465,25 +476,26 @@
               </span>
             </div>
           </div>
+        </div>
 
-          <div class="ticker__edge ticker__edge--left" aria-hidden="true">
-            <span class="ticker__blur-band ticker__blur-band--soft"></span>
-            <span class="ticker__blur-band ticker__blur-band--medium"></span>
-            <span class="ticker__blur-band ticker__blur-band--strong"></span>
-          </div>
+        <div class="ticker__edge ticker__edge--left" aria-hidden="true">
+          <span class="ticker__blur-band ticker__blur-band--soft"></span>
+          <span class="ticker__blur-band ticker__blur-band--medium"></span>
+          <span class="ticker__blur-band ticker__blur-band--strong"></span>
+        </div>
 
-          <div class="ticker__edge ticker__edge--right" aria-hidden="true">
-            <span class="ticker__blur-band ticker__blur-band--soft"></span>
-            <span class="ticker__blur-band ticker__blur-band--medium"></span>
-            <span class="ticker__blur-band ticker__blur-band--strong"></span>
-          </div>
+        <div class="ticker__edge ticker__edge--right" aria-hidden="true">
+          <span class="ticker__blur-band ticker__blur-band--soft"></span>
+          <span class="ticker__blur-band ticker__blur-band--medium"></span>
+          <span class="ticker__blur-band ticker__blur-band--strong"></span>
         </div>
       </section>
 
       <img
         class="footer-image"
-        src="./public/footer.png?v=6"
+        src="./public/footer.png?v=7"
         alt=""
+        draggable="false"
       />
     </footer>
   </div>
@@ -512,11 +524,27 @@
       { label: "Telegram", arrow: true },
     ];
 
+    const apiItems = [
+      {
+        label: "Wikipedia",
+        href: "https://www.mediawiki.org/wiki/API:Main_page",
+        external: true,
+        arrow: true,
+      },
+      {
+        label: "Google Gemini",
+        href: "https://ai.google.dev/gemini-api/docs",
+        external: true,
+        arrow: true,
+      },
+    ];
+
     const menuColumns = [
       { title: "Практика", items: practiceItems },
       { title: "Опции", items: optionsItems },
       { title: "Награды", items: rewardsItems },
       { title: "Соушл", items: socialItems },
+      { title: "API", items: apiItems },
     ];
 
     const navigation = document.querySelector("#site-navigation");
@@ -544,7 +572,12 @@
         const link = document.createElement("a");
 
         link.className = "menu-link";
-        link.href = "./";
+        link.href = entry.href || "./";
+
+        if (entry.external) {
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
 
         if (entry.arrow) {
           const arrow = document.createElement("span");
@@ -555,6 +588,7 @@
         }
 
         const label = document.createElement("span");
+        label.className = "menu-link__label";
         label.textContent = entry.label;
 
         link.append(label);
@@ -566,9 +600,11 @@
       navigation.append(group);
     });
 
-    // Оригинальные короткие истории для прототипа.
-    // При каждом открытии страницы выбираются случайная история
-    // и случайный абзац, чаще второй или третий.
+    /*
+      Оригинальные короткие истории для прототипа.
+      Страница выбирает случайную историю и начинает обычно
+      со второго или третьего абзаца.
+    */
     const readingStories = [
       [
         "When Maya moved to a new city, she decided to walk home from work instead of taking the bus.",
@@ -599,10 +635,22 @@
     const ticker = document.querySelector("#reading-ticker");
     const tickerViewport = document.querySelector("#ticker-viewport");
     const tickerTrack = document.querySelector("#ticker-track");
-
     const reducedMotionQuery = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     );
+
+    const AUTO_SCROLL_SPEED = 24;
+    const MIN_TICKER_CYCLE_WIDTH = 1180;
+
+    let currentTickerText = "";
+    let tickerCycleWidth = 0;
+    let lastFrameTime = 0;
+    let resumeAutoScrollAt = 0;
+    let pointerDrag = null;
+
+    function pauseAutoScroll(duration = 3000) {
+      resumeAutoScrollAt = performance.now() + duration;
+    }
 
     function chooseStartingParagraph(paragraphCount) {
       if (paragraphCount <= 1) {
@@ -650,82 +698,73 @@
     }
 
     function makeExcerpt(paragraphs, startIndex) {
-      const text = paragraphs
-        .slice(startIndex)
-        .join(" ");
-
-      return limitExcerpt(text);
+      return limitExcerpt(paragraphs.slice(startIndex).join(" "));
     }
 
-    function createTextItem(text) {
+    function createTickerText(text) {
       const item = document.createElement("span");
       item.className = "ticker__text";
       item.textContent = text;
       return item;
     }
 
-    function appendTickerCopy(group, text, addSeparator) {
-      if (addSeparator) {
-        const separator = document.createElement("span");
-        separator.className = "ticker__separator";
-        separator.setAttribute("aria-hidden", "true");
-        separator.textContent = "·";
-        group.append(separator);
-      }
+    function appendTickerCopy(group, text) {
+      const separator = document.createElement("span");
+      separator.className = "ticker__separator";
+      separator.setAttribute("aria-hidden", "true");
+      separator.textContent = "·";
 
-      group.append(createTextItem(text));
+      group.append(separator, createTickerText(text));
     }
 
-    function createTickerGroup(text, isDuplicate = false) {
+    function createTickerGroup(text) {
       const group = document.createElement("div");
       group.className = "ticker__group";
-
-      if (isDuplicate) {
-        group.setAttribute("aria-hidden", "true");
-      }
-
-      appendTickerCopy(group, text, false);
+      group.append(createTickerText(text));
       return group;
     }
 
     function renderTickerText(text) {
+      currentTickerText = text;
+      tickerCycleWidth = 0;
+      tickerViewport.scrollLeft = 0;
       tickerTrack.replaceChildren();
-      ticker.classList.add("ticker--static");
 
       const firstGroup = createTickerGroup(text);
       tickerTrack.append(firstGroup);
+      ticker.classList.add("ticker--static");
 
-      // Если короткий отрывок не заполняет всю ширину,
-      // повторяем его, чтобы анимация шла без пустых промежутков.
-      if (!reducedMotionQuery.matches) {
-        let copyCount = 1;
-        const minimumWidth = tickerViewport.clientWidth + 100;
-
-        while (
-          firstGroup.scrollWidth < minimumWidth &&
-          copyCount < 8
-        ) {
-          appendTickerCopy(firstGroup, text, true);
-          copyCount += 1;
-        }
-
-        const duplicateGroup = firstGroup.cloneNode(true);
-        duplicateGroup.setAttribute("aria-hidden", "true");
-        tickerTrack.append(duplicateGroup);
-
-        requestAnimationFrame(() => {
-          const groupWidth = firstGroup.getBoundingClientRect().width;
-          const pixelsPerSecond = 30;
-          const duration = Math.max(42, groupWidth / pixelsPerSecond);
-
-          tickerTrack.style.setProperty(
-            "--ticker-duration",
-            `${duration.toFixed(1)}s`
-          );
-
-          ticker.classList.remove("ticker--static");
-        });
+      if (reducedMotionQuery.matches) {
+        return;
       }
+
+      const targetWidth = Math.max(
+        tickerViewport.clientWidth,
+        MIN_TICKER_CYCLE_WIDTH
+      ) + 80;
+
+      let copyCount = 1;
+
+      while (
+        firstGroup.scrollWidth < targetWidth &&
+        copyCount < 8
+      ) {
+        appendTickerCopy(firstGroup, text);
+        copyCount += 1;
+      }
+
+      const duplicateGroup = firstGroup.cloneNode(true);
+      duplicateGroup.setAttribute("aria-hidden", "true");
+      tickerTrack.append(duplicateGroup);
+
+      requestAnimationFrame(() => {
+        tickerCycleWidth = firstGroup.getBoundingClientRect().width;
+
+        if (tickerCycleWidth > 0) {
+          tickerViewport.scrollLeft = 0;
+          ticker.classList.remove("ticker--static");
+        }
+      });
     }
 
     function renderRandomStory() {
@@ -740,7 +779,179 @@
       renderTickerText(excerpt);
     }
 
+    function tickerAnimationFrame(timestamp) {
+      if (!lastFrameTime) {
+        lastFrameTime = timestamp;
+      }
+
+      const elapsedSeconds = Math.min(
+        (timestamp - lastFrameTime) / 1000,
+        0.05
+      );
+
+      lastFrameTime = timestamp;
+
+      const pointerIsOverTicker = ticker.matches(":hover");
+      const tickerHasKeyboardFocus = ticker.contains(
+        document.activeElement
+      );
+
+      const shouldAutoScroll =
+        !reducedMotionQuery.matches &&
+        !ticker.classList.contains("ticker--static") &&
+        document.visibilityState === "visible" &&
+        !pointerIsOverTicker &&
+        !tickerHasKeyboardFocus &&
+        !pointerDrag &&
+        timestamp >= resumeAutoScrollAt;
+
+      if (shouldAutoScroll) {
+        tickerViewport.scrollLeft +=
+          AUTO_SCROLL_SPEED * elapsedSeconds;
+      }
+
+      if (tickerCycleWidth > 0) {
+        const currentScroll = tickerViewport.scrollLeft;
+
+        if (currentScroll >= tickerCycleWidth) {
+          tickerViewport.scrollLeft =
+            currentScroll % tickerCycleWidth;
+        }
+      }
+
+      requestAnimationFrame(tickerAnimationFrame);
+    }
+
+    tickerViewport.addEventListener(
+      "wheel",
+      (event) => {
+        pauseAutoScroll();
+
+        // Shift + scroll wheel moves the ticker horizontally.
+        if (event.shiftKey && event.deltaY !== 0) {
+          event.preventDefault();
+
+          const multiplier =
+            event.deltaMode === WheelEvent.DOM_DELTA_LINE
+              ? 16
+              : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+                ? tickerViewport.clientWidth
+                : 1;
+
+          tickerViewport.scrollLeft += event.deltaY * multiplier;
+        }
+
+        // A trackpad's native horizontal delta scrolls the viewport directly.
+      },
+      { passive: false }
+    );
+
+    tickerViewport.addEventListener("keydown", (event) => {
+      const step = Math.max(
+        80,
+        Math.round(tickerViewport.clientWidth * 0.18)
+      );
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        tickerViewport.scrollLeft += step;
+        pauseAutoScroll();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        tickerViewport.scrollLeft -= step;
+        pauseAutoScroll();
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        tickerViewport.scrollLeft = 0;
+        pauseAutoScroll();
+      } else if (event.key === "End") {
+        event.preventDefault();
+        tickerViewport.scrollLeft =
+          tickerViewport.scrollWidth - tickerViewport.clientWidth;
+        pauseAutoScroll();
+      }
+    });
+
+    tickerViewport.addEventListener("pointerdown", (event) => {
+      pauseAutoScroll();
+
+      if (event.pointerType === "touch") {
+        // Native touch scrolling is handled by the browser.
+        return;
+      }
+
+      if (event.pointerType !== "mouse" || event.button !== 0) {
+        return;
+      }
+
+      pointerDrag = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startScrollLeft: tickerViewport.scrollLeft,
+        moved: false,
+      };
+
+      tickerViewport.classList.add("is-dragging");
+      tickerViewport.setPointerCapture(event.pointerId);
+    });
+
+    tickerViewport.addEventListener("pointermove", (event) => {
+      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const deltaX = event.clientX - pointerDrag.startX;
+
+      if (Math.abs(deltaX) > 3) {
+        pointerDrag.moved = true;
+      }
+
+      if (pointerDrag.moved) {
+        event.preventDefault();
+
+        tickerViewport.scrollLeft =
+          pointerDrag.startScrollLeft - deltaX;
+      }
+    });
+
+    function finishPointerDrag(event) {
+      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
+        return;
+      }
+
+      pointerDrag = null;
+      tickerViewport.classList.remove("is-dragging");
+      pauseAutoScroll(2200);
+    }
+
+    tickerViewport.addEventListener("pointerup", finishPointerDrag);
+    tickerViewport.addEventListener("pointercancel", finishPointerDrag);
+
+    tickerViewport.addEventListener("focusin", () => {
+      pauseAutoScroll();
+    });
+
+    tickerViewport.addEventListener("focusout", () => {
+      pauseAutoScroll(1800);
+    });
+
+    function handleMotionPreferenceChange() {
+      if (currentTickerText) {
+        renderTickerText(currentTickerText);
+      }
+    }
+
+    if (typeof reducedMotionQuery.addEventListener === "function") {
+      reducedMotionQuery.addEventListener(
+        "change",
+        handleMotionPreferenceChange
+      );
+    } else {
+      reducedMotionQuery.addListener(handleMotionPreferenceChange);
+    }
+
     renderRandomStory();
+    requestAnimationFrame(tickerAnimationFrame);
   </script>
 </body>
 </html>
