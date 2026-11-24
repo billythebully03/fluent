@@ -62,13 +62,13 @@
 
     .site-main {
       display: grid;
-      grid-template-columns: minmax(240px, 0.92fr) minmax(0, 2.08fr);
-      column-gap: clamp(56px, 7vw, 92px);
+      grid-template-columns: minmax(340px, 1.05fr) minmax(0, 1.95fr);
+      column-gap: clamp(44px, 4vw, 58px);
       align-items: start;
     }
 
     .brand-block {
-      max-width: 320px;
+      max-width: 390px;
     }
 
     .brand {
@@ -95,7 +95,7 @@
     }
 
     .tagline {
-      max-width: 310px;
+      max-width: 370px;
       margin: 21px 0 0;
       color: var(--text-secondary);
       font-size: 17px;
@@ -107,7 +107,7 @@
     .site-navigation {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      column-gap: clamp(18px, 2.4vw, 30px);
+      column-gap: clamp(12px, 1.5vw, 20px);
     }
 
     .menu-column {
@@ -132,22 +132,44 @@
       list-style: none;
     }
 
-    .menu-item {
+    .menu-link {
       display: inline-flex;
       align-items: center;
       gap: 7px;
+      width: fit-content;
       color: var(--text-menu);
       font-size: 14px;
       font-weight: 400;
       line-height: 1.45;
       letter-spacing: -0.01em;
-      cursor: default;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 160ms ease, opacity 160ms ease;
+    }
+
+    .menu-link:hover {
+      color: var(--text-primary);
+    }
+
+    .menu-link:active {
+      opacity: 0.55;
+    }
+
+    .menu-link:focus-visible {
+      outline: 2px solid var(--apple-blue);
+      outline-offset: 4px;
+      border-radius: 2px;
     }
 
     .menu-arrow {
       flex: none;
       font-size: 12px;
       line-height: 1;
+      transition: transform 160ms ease;
+    }
+
+    .menu-link:hover .menu-arrow {
+      transform: translate(2px, -2px);
     }
 
     .site-footer {
@@ -213,13 +235,16 @@
   <div class="page-shell">
     <main class="site-main" id="top">
       <section class="brand-block" aria-label="О Fluent">
-        <a class="brand" href="#top">
-          <!-- Файлы из public доступны по адресам /fluent.png и /footer.png -->
-          <img class="brand-logo" src="/fluent.png" alt="Fluent" />
+        <a class="brand" href="./" aria-label="Fluent — главная страница">
+          <img
+            class="brand-logo"
+            src="./public/fluent.png"
+            alt="Fluent"
+          />
         </a>
 
         <h1 class="tagline">
-          Английский проще, чем кажется.<br />
+          Английский не такой сложный.<br />
           Зачем зубрить, если можно практиковаться и становиться увереннее?
         </h1>
       </section>
@@ -232,68 +257,88 @@
     </main>
 
     <footer class="site-footer">
-      <img class="footer-image" src="/footer.png" alt="" />
+      <img
+        class="footer-image"
+        src="./public/footer.png"
+        alt=""
+      />
     </footer>
   </div>
 
   <script>
-    // У каждого столбца — свой список пунктов.
-    // Строки пока выводятся как некликабельные заглушки.
+    // У каждого столбца свой массив пунктов.
+    const practiceItems = [
+      "Заглушка",
+      "Ещё одна",
+      "Заглушка",
+      "Ещё одна",
+    ];
+
+    const materialsItems = [
+      "Заглушка",
+      "Ещё одна",
+      "Заглушка",
+    ];
+
+    const aboutItems = [
+      "Ещё одна",
+      "Заглушка",
+      "Ещё одна",
+      "Заглушка",
+    ];
+
+    const socialItems = [
+      { label: "GitHub", arrow: true },
+      { label: "Telegram", arrow: true },
+    ];
+
     const menuColumns = [
-      {
-        title: "Практика",
-        items: ["Заглушка", "Ещё одна", "Заглушка", "Ещё одна"],
-      },
-      {
-        title: "Материалы",
-        items: ["Заглушка", "Ещё одна", "Заглушка"],
-      },
-      {
-        title: "О проекте",
-        items: ["Ещё одна", "Заглушка", "Ещё одна", "Заглушка"],
-      },
-      {
-        title: "Social",
-        items: [
-          { label: "GitHub", external: true },
-          { label: "Telegram", external: true },
-        ],
-      },
+      { title: "Практика", items: practiceItems },
+      { title: "Материалы", items: materialsItems },
+      { title: "О проекте", items: aboutItems },
+      { title: "Social", items: socialItems },
     ];
 
     const navigation = document.querySelector("#site-navigation");
 
-    menuColumns.forEach((column) => {
+    menuColumns.forEach((column, index) => {
       const group = document.createElement("section");
       group.className = "menu-column";
 
       const heading = document.createElement("h2");
       heading.className = "menu-heading";
+      heading.id = `menu-heading-${index}`;
       heading.textContent = column.title;
+
+      group.setAttribute("aria-labelledby", heading.id);
 
       const list = document.createElement("ul");
       list.className = "menu-list";
 
       column.items.forEach((item) => {
-        const entry = typeof item === "string" ? { label: item } : item;
+        const entry = typeof item === "string"
+          ? { label: item }
+          : item;
 
         const listItem = document.createElement("li");
-        const label = document.createElement("span");
-        label.className = "menu-item";
+        const link = document.createElement("a");
 
-        if (entry.external) {
+        link.className = "menu-link";
+        link.href = entry.href || "./";
+
+        if (entry.arrow) {
           const arrow = document.createElement("span");
           arrow.className = "menu-arrow";
           arrow.setAttribute("aria-hidden", "true");
           arrow.textContent = "↗";
-          label.append(arrow);
+          link.append(arrow);
         }
 
-        const text = document.createElement("span");
-        text.textContent = entry.label;
-        label.append(text);
+        const label = document.createElement("span");
+        label.textContent = entry.label;
 
-        listItem.append(label);
+        link.append(label);
+        listItem.append(link);
         list.append(listItem);
       });
 
