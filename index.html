@@ -62,8 +62,8 @@
 
     .site-main {
       display: grid;
-      grid-template-columns: minmax(390px, 1.1fr) minmax(0, 1.9fr);
-      column-gap: clamp(32px, 4vw, 44px);
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
+      column-gap: clamp(44px, 5vw, 58px);
       align-items: start;
     }
 
@@ -82,8 +82,8 @@
     .brand-logo {
       display: block;
       width: auto;
-      height: 28px;
-      max-width: 170px;
+      height: 46px;
+      max-width: 260px;
       object-fit: contain;
       object-position: left center;
     }
@@ -96,19 +96,19 @@
 
     .tagline {
       max-width: 410px;
-      margin: 24px 0 0;
+      margin: 21px 0 0;
       color: var(--text-secondary);
-      font-size: clamp(26px, 2.5vw, 30px);
-      font-weight: 500;
-      line-height: 1.27;
-      letter-spacing: -0.035em;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: -0.015em;
     }
 
     .site-navigation {
       display: grid;
       width: min(100%, 500px);
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      column-gap: 2px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 8px;
       margin-left: auto;
     }
 
@@ -180,7 +180,6 @@
       width: 100%;
       max-width: 100%;
       height: auto;
-      max-height: none;
       margin-inline: auto;
     }
 
@@ -222,8 +221,12 @@
         column-gap: 24px;
       }
 
+      .brand-logo {
+        height: 40px;
+      }
+
       .tagline {
-        font-size: 24px;
+        font-size: 16px;
       }
 
       .site-footer {
@@ -275,14 +278,7 @@
       "Ещё одна",
     ];
 
-    const materialsItems = [
-      "Заглушка",
-      "Ещё одна",
-      "Заглушка",
-    ];
-
-    const aboutItems = [
-      "Ещё одна",
+    const optionsItems = [
       "Заглушка",
       "Ещё одна",
       "Заглушка",
@@ -295,9 +291,8 @@
 
     const menuColumns = [
       { title: "Практика", items: practiceItems },
-      { title: "Материалы", items: materialsItems },
-      { title: "О проекте", items: aboutItems },
-      { title: "Social", items: socialItems },
+      { title: "Опции", items: optionsItems },
+      { title: "Соушл", items: socialItems },
     ];
 
     const navigation = document.querySelector("#site-navigation");
@@ -325,7 +320,7 @@
         const link = document.createElement("a");
 
         link.className = "menu-link";
-        link.href = entry.href || "./";
+        link.href = "./";
 
         if (entry.arrow) {
           const arrow = document.createElement("span");
