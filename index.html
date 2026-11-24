@@ -175,7 +175,7 @@
       padding-top: clamp(88px, 13vh, 140px);
     }
 
-    /* Полоска с англоязычным отрывком */
+    /* Бегущая строка с англоязычным отрывком */
     .ticker {
       width: 100%;
       min-height: 48px;
@@ -187,6 +187,30 @@
     .ticker__viewport {
       width: 100%;
       overflow: hidden;
+
+      /* Плавно скрываем текст у левого и правого краёв */
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(0, 0, 0, 0.32) 3%,
+        #000 10%,
+        #000 90%,
+        rgba(0, 0, 0, 0.32) 97%,
+        transparent 100%
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(0, 0, 0, 0.32) 3%,
+        #000 10%,
+        #000 90%,
+        rgba(0, 0, 0, 0.32) 97%,
+        transparent 100%
+      );
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
     }
 
     .ticker__track {
@@ -205,28 +229,6 @@
       white-space: nowrap;
     }
 
-    .ticker__label {
-      flex: none;
-      color: #86868b;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .ticker__source {
-      flex: none;
-      color: #424245;
-      font-size: 12px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .ticker__source:hover {
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
     .ticker__excerpt {
       color: #6e6e73;
       font-size: 13px;
@@ -234,26 +236,38 @@
       letter-spacing: -0.01em;
     }
 
-    .ticker__license,
-    .ticker__status {
+    .ticker__credit {
+      display: inline-flex;
       flex: none;
+      align-items: center;
+      gap: 7px;
       color: #86868b;
       font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .ticker__source,
+    .ticker__license {
+      color: inherit;
+      font-size: inherit;
+      font-weight: 400;
       text-decoration: none;
     }
 
+    .ticker__source:hover,
     .ticker__license:hover {
       text-decoration: underline;
       text-underline-offset: 3px;
     }
 
+    .ticker__status {
+      color: #86868b;
+      font-size: 12px;
+    }
+
     .ticker--static .ticker__track {
       width: 100%;
       animation: none;
-    }
-
-    .ticker--static .ticker__group {
-      width: 100%;
     }
 
     .footer-image {
@@ -280,6 +294,11 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .ticker__viewport {
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+
       .ticker__track {
         width: 100%;
         animation: none;
@@ -294,11 +313,17 @@
         width: 100%;
         flex-basis: 100%;
         flex-wrap: wrap;
+        gap: 8px 14px;
         padding-block: 14px;
         white-space: normal;
       }
 
       .ticker__excerpt {
+        white-space: normal;
+      }
+
+      .ticker__credit {
+        flex-wrap: wrap;
         white-space: normal;
       }
     }
@@ -400,7 +425,7 @@
 
       <img
         class="footer-image"
-        src="./public/footer.png?v=4"
+        src="./public/footer.png?v=5"
         alt=""
       />
     </footer>
@@ -504,7 +529,7 @@
         return 0;
       }
 
-      // В большинстве случаев начинаем со 2-го или 3-го абзаца.
+      // Чаще начинаем со второго или третьего абзаца.
       const preferredParagraphs = [1, 2].filter(
         (index) => index < paragraphCount
       );
@@ -561,7 +586,12 @@
       return limitExcerpt(selectedParagraphs.join(" "));
     }
 
-    function createTickerGroup({ title, pageUrl, excerpt, duplicate }) {
+    function createTickerGroup({
+      title,
+      pageUrl,
+      excerpt,
+      duplicate,
+    }) {
       const group = document.createElement("div");
       group.className = "ticker__group";
 
@@ -569,9 +599,15 @@
         group.setAttribute("aria-hidden", "true");
       }
 
-      const sourceLabel = document.createElement("span");
-      sourceLabel.className = "ticker__label";
-      sourceLabel.textContent = "EN · SIMPLE WIKIPEDIA";
+      const excerptText = document.createElement("span");
+      excerptText.className = "ticker__excerpt";
+      excerptText.textContent = excerpt;
+
+      const credit = document.createElement("span");
+      credit.className = "ticker__credit";
+
+      const sourceName = document.createElement("span");
+      sourceName.textContent = "Source: Simple English Wikipedia";
 
       const sourceLink = document.createElement("a");
       sourceLink.className = "ticker__source";
@@ -584,9 +620,9 @@
         `Read “${title}” on Simple English Wikipedia`
       );
 
-      const excerptText = document.createElement("span");
-      excerptText.className = "ticker__excerpt";
-      excerptText.textContent = excerpt;
+      const separator = document.createElement("span");
+      separator.setAttribute("aria-hidden", "true");
+      separator.textContent = "·";
 
       const licenseLink = document.createElement("a");
       licenseLink.className = "ticker__license";
@@ -604,12 +640,15 @@
         licenseLink.tabIndex = -1;
       }
 
-      group.append(
-        sourceLabel,
+      credit.append(
+        sourceName,
         sourceLink,
-        excerptText,
+        separator,
         licenseLink
       );
+
+      // Отрывок идёт первым, атрибуция — в конце.
+      group.append(excerptText, credit);
 
       return group;
     }
@@ -663,7 +702,6 @@
           return;
         }
 
-        // Скорость зависит от длины отрывка, чтобы он не пролетал слишком быстро.
         const pixelsPerSecond = 34;
         const duration = Math.max(
           45,
@@ -698,7 +736,9 @@
         );
 
         if (!response.ok) {
-          throw new Error(`Wikipedia API returned ${response.status}`);
+          throw new Error(
+            `Wikipedia API returned ${response.status}`
+          );
         }
 
         const data = await response.json();
