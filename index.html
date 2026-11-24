@@ -189,10 +189,6 @@
       padding-top: clamp(88px, 13vh, 140px);
     }
 
-    /*
-      Центральная часть бегущей строки слегка серая,
-      края постепенно сливаются с белым фоном сайта.
-    */
     .ticker {
       --ticker-edge-width: clamp(58px, 11vw, 122px);
 
@@ -202,6 +198,7 @@
       height: 52px;
       margin-bottom: 18px;
       overflow: hidden;
+      overscroll-behavior-x: none;
       background: linear-gradient(
         to right,
         #ffffff 0%,
@@ -209,7 +206,11 @@
         #f5f5f7 89%,
         #ffffff 100%
       );
-      contain: layout paint;
+
+      /* Текст бегущей строки нельзя выделить. */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .ticker__viewport {
@@ -219,12 +220,16 @@
       height: 52px;
       overflow-x: auto;
       overflow-y: hidden;
-      overscroll-behavior-x: contain;
+      overscroll-behavior-x: none;
+      overscroll-behavior-inline: none;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       scroll-behavior: auto;
-      touch-action: pan-x;
+      touch-action: pan-x pan-y;
       cursor: grab;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .ticker__viewport::-webkit-scrollbar {
@@ -233,13 +238,18 @@
 
     .ticker__viewport.is-dragging {
       cursor: grabbing;
-      user-select: none;
-      -webkit-user-select: none;
     }
 
     .ticker__viewport:focus-visible {
       outline: 2px solid var(--apple-blue);
       outline-offset: -2px;
+    }
+
+    .ticker__viewport,
+    .ticker__viewport * {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .ticker__track {
@@ -248,7 +258,6 @@
       min-width: max-content;
       height: 100%;
       align-items: stretch;
-      will-change: scroll-position;
     }
 
     .ticker__group {
@@ -277,10 +286,6 @@
       line-height: 1;
     }
 
-    /*
-      Мягкие наложения по краям: фон белеет, а текст размывается.
-      Каждый следующий слой сильнее предыдущего.
-    */
     .ticker__edge {
       position: absolute;
       z-index: 3;
@@ -352,6 +357,11 @@
     .ticker__edge--right .ticker__blur-band {
       right: 0;
       left: auto;
+    }
+
+    .ticker--static .ticker__track {
+      animation: none;
+      transform: none;
     }
 
     .footer-image {
@@ -600,11 +610,6 @@
       navigation.append(group);
     });
 
-    /*
-      Оригинальные короткие истории для прототипа.
-      Страница выбирает случайную историю и начинает обычно
-      со второго или третьего абзаца.
-    */
     const readingStories = [
       [
         "When Maya moved to a new city, she decided to walk home from work instead of taking the bus.",
@@ -647,8 +652,9 @@
     let lastFrameTime = 0;
     let resumeAutoScrollAt = 0;
     let pointerDrag = null;
+    let resizeTimer = null;
 
-    function pauseAutoScroll(duration = 3000) {
+    function pauseAutoScroll(duration = 2400) {
       resumeAutoScrollAt = performance.now() + duration;
     }
 
@@ -729,10 +735,10 @@
       tickerCycleWidth = 0;
       tickerViewport.scrollLeft = 0;
       tickerTrack.replaceChildren();
+      ticker.classList.add("ticker--static");
 
       const firstGroup = createTickerGroup(text);
       tickerTrack.append(firstGroup);
-      ticker.classList.add("ticker--static");
 
       if (reducedMotionQuery.matches) {
         return;
@@ -779,6 +785,167 @@
       renderTickerText(excerpt);
     }
 
+    /*
+      Используется для колёсика, клавиатуры и перетаскивания.
+      Слева прокрутка останавливается на нуле — событие при этом
+      уже отменено, поэтому Safari не должен запускать жест «назад».
+    */
+    function setTickerScrollPosition(nextPosition) {
+      if (!Number.isFinite(nextPosition)) {
+        return;
+      }
+
+      if (nextPosition < 0) {
+        tickerViewport.scrollLeft = 0;
+        return;
+      }
+
+      if (tickerCycleWidth > 0 && nextPosition >= tickerCycleWidth) {
+        nextPosition %= tickerCycleWidth;
+      }
+
+      tickerViewport.scrollLeft = nextPosition;
+    }
+
+    function normalizeWheelDelta(delta, event) {
+      if (event.deltaMode === 1) {
+        return delta * 16;
+      }
+
+      if (event.deltaMode === 2) {
+        return delta * tickerViewport.clientWidth;
+      }
+
+      return delta;
+    }
+
+    function handleTickerWheel(event) {
+      const horizontalIntent =
+        event.shiftKey ||
+        Math.abs(event.deltaX) > Math.abs(event.deltaY);
+
+      if (!horizontalIntent) {
+        // Обычная вертикальная прокрутка страницы работает как прежде.
+        return;
+      }
+
+      const rawDelta = event.shiftKey
+        ? (event.deltaY || event.deltaX)
+        : event.deltaX;
+
+      if (!rawDelta) {
+        return;
+      }
+
+      /*
+        Перехватываем горизонтальный жест внутри строки.
+        Это важно на левом краю, где Safari может воспринимать
+        движение тачпада как переход на предыдущую страницу.
+      */
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+
+      event.stopPropagation();
+      pauseAutoScroll();
+
+      const delta = normalizeWheelDelta(rawDelta, event);
+
+      setTickerScrollPosition(
+        tickerViewport.scrollLeft + delta
+      );
+    }
+
+    tickerViewport.addEventListener(
+      "wheel",
+      handleTickerWheel,
+      { passive: false, capture: true }
+    );
+
+    tickerViewport.addEventListener("keydown", (event) => {
+      const step = Math.max(
+        80,
+        Math.round(tickerViewport.clientWidth * 0.18)
+      );
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setTickerScrollPosition(tickerViewport.scrollLeft + step);
+        pauseAutoScroll();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setTickerScrollPosition(tickerViewport.scrollLeft - step);
+        pauseAutoScroll();
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        tickerViewport.scrollLeft = 0;
+        pauseAutoScroll();
+      } else if (event.key === "End") {
+        event.preventDefault();
+        setTickerScrollPosition(tickerCycleWidth || tickerViewport.scrollWidth);
+        pauseAutoScroll();
+      }
+    });
+
+    tickerViewport.addEventListener("pointerdown", (event) => {
+      pauseAutoScroll();
+
+      if (event.pointerType === "touch") {
+        // На сенсорном экране остаётся доступна нативная прокрутка.
+        return;
+      }
+
+      if (event.pointerType !== "mouse" || event.button !== 0) {
+        return;
+      }
+
+      event.preventDefault();
+
+      pointerDrag = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startScrollLeft: tickerViewport.scrollLeft,
+      };
+
+      tickerViewport.classList.add("is-dragging");
+      tickerViewport.setPointerCapture(event.pointerId);
+    });
+
+    tickerViewport.addEventListener("pointermove", (event) => {
+      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const deltaX = event.clientX - pointerDrag.startX;
+
+      setTickerScrollPosition(
+        pointerDrag.startScrollLeft - deltaX
+      );
+    });
+
+    function finishPointerDrag(event) {
+      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
+        return;
+      }
+
+      pointerDrag = null;
+      tickerViewport.classList.remove("is-dragging");
+      pauseAutoScroll(2200);
+    }
+
+    tickerViewport.addEventListener("pointerup", finishPointerDrag);
+    tickerViewport.addEventListener("pointercancel", finishPointerDrag);
+
+    tickerViewport.addEventListener("focusin", () => {
+      pauseAutoScroll();
+    });
+
+    tickerViewport.addEventListener("focusout", () => {
+      pauseAutoScroll(1800);
+    });
+
     function tickerAnimationFrame(timestamp) {
       if (!lastFrameTime) {
         lastFrameTime = timestamp;
@@ -806,134 +973,17 @@
         timestamp >= resumeAutoScrollAt;
 
       if (shouldAutoScroll) {
-        tickerViewport.scrollLeft +=
-          AUTO_SCROLL_SPEED * elapsedSeconds;
-      }
-
-      if (tickerCycleWidth > 0) {
-        const currentScroll = tickerViewport.scrollLeft;
-
-        if (currentScroll >= tickerCycleWidth) {
-          tickerViewport.scrollLeft =
-            currentScroll % tickerCycleWidth;
-        }
+        setTickerScrollPosition(
+          tickerViewport.scrollLeft +
+          AUTO_SCROLL_SPEED * elapsedSeconds
+        );
+      } else if (tickerViewport.scrollLeft < 0) {
+        // На случай отрицательного overscroll в браузерах WebKit.
+        tickerViewport.scrollLeft = 0;
       }
 
       requestAnimationFrame(tickerAnimationFrame);
     }
-
-    tickerViewport.addEventListener(
-      "wheel",
-      (event) => {
-        pauseAutoScroll();
-
-        // Shift + scroll wheel moves the ticker horizontally.
-        if (event.shiftKey && event.deltaY !== 0) {
-          event.preventDefault();
-
-          const multiplier =
-            event.deltaMode === WheelEvent.DOM_DELTA_LINE
-              ? 16
-              : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
-                ? tickerViewport.clientWidth
-                : 1;
-
-          tickerViewport.scrollLeft += event.deltaY * multiplier;
-        }
-
-        // A trackpad's native horizontal delta scrolls the viewport directly.
-      },
-      { passive: false }
-    );
-
-    tickerViewport.addEventListener("keydown", (event) => {
-      const step = Math.max(
-        80,
-        Math.round(tickerViewport.clientWidth * 0.18)
-      );
-
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        tickerViewport.scrollLeft += step;
-        pauseAutoScroll();
-      } else if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        tickerViewport.scrollLeft -= step;
-        pauseAutoScroll();
-      } else if (event.key === "Home") {
-        event.preventDefault();
-        tickerViewport.scrollLeft = 0;
-        pauseAutoScroll();
-      } else if (event.key === "End") {
-        event.preventDefault();
-        tickerViewport.scrollLeft =
-          tickerViewport.scrollWidth - tickerViewport.clientWidth;
-        pauseAutoScroll();
-      }
-    });
-
-    tickerViewport.addEventListener("pointerdown", (event) => {
-      pauseAutoScroll();
-
-      if (event.pointerType === "touch") {
-        // Native touch scrolling is handled by the browser.
-        return;
-      }
-
-      if (event.pointerType !== "mouse" || event.button !== 0) {
-        return;
-      }
-
-      pointerDrag = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startScrollLeft: tickerViewport.scrollLeft,
-        moved: false,
-      };
-
-      tickerViewport.classList.add("is-dragging");
-      tickerViewport.setPointerCapture(event.pointerId);
-    });
-
-    tickerViewport.addEventListener("pointermove", (event) => {
-      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
-        return;
-      }
-
-      const deltaX = event.clientX - pointerDrag.startX;
-
-      if (Math.abs(deltaX) > 3) {
-        pointerDrag.moved = true;
-      }
-
-      if (pointerDrag.moved) {
-        event.preventDefault();
-
-        tickerViewport.scrollLeft =
-          pointerDrag.startScrollLeft - deltaX;
-      }
-    });
-
-    function finishPointerDrag(event) {
-      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
-        return;
-      }
-
-      pointerDrag = null;
-      tickerViewport.classList.remove("is-dragging");
-      pauseAutoScroll(2200);
-    }
-
-    tickerViewport.addEventListener("pointerup", finishPointerDrag);
-    tickerViewport.addEventListener("pointercancel", finishPointerDrag);
-
-    tickerViewport.addEventListener("focusin", () => {
-      pauseAutoScroll();
-    });
-
-    tickerViewport.addEventListener("focusout", () => {
-      pauseAutoScroll(1800);
-    });
 
     function handleMotionPreferenceChange() {
       if (currentTickerText) {
@@ -949,6 +999,22 @@
     } else {
       reducedMotionQuery.addListener(handleMotionPreferenceChange);
     }
+
+    window.addEventListener(
+      "resize",
+      () => {
+        if (!currentTickerText) {
+          return;
+        }
+
+        window.clearTimeout(resizeTimer);
+
+        resizeTimer = window.setTimeout(() => {
+          renderTickerText(currentTickerText);
+        }, 150);
+      },
+      { passive: true }
+    );
 
     renderRandomStory();
     requestAnimationFrame(tickerAnimationFrame);
