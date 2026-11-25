@@ -1,8 +1,3 @@
-Добавил шестой столбец **Аккаунт** с пунктами «Мои интересы» и «Сохраненные», а в **Наградах** заменил заглушки на короткий текст с подчёркнутой ссылкой «ознакомься подробнее» — она пока ведёт на ту же страницу, как остальные заглушки. Из-за нового столбца слегка уменьшил промежутки в меню, чтобы «Google Gemini» не переносился на вторую строку.
-
-Полный `index.html`:
-
-```html
 <!doctype html>
 <html lang="ru">
 <head>
@@ -75,8 +70,8 @@
 
     .site-main {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 740px;
-      column-gap: clamp(24px, 3vw, 36px);
+      grid-template-columns: minmax(0, 1fr) 650px;
+      column-gap: clamp(32px, 4vw, 44px);
       align-items: start;
     }
 
@@ -119,9 +114,9 @@
 
     .site-navigation {
       display: grid;
-      width: 740px;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      column-gap: 12px;
+      width: 650px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      column-gap: 18px;
       justify-self: end;
     }
 
@@ -188,9 +183,10 @@
       line-height: 1;
     }
 
-    /* Пояснительный текст внутри столбца (например, в «Наградах») */
+    /* Короткая заметка вместо списка пунктов */
     .menu-note {
       margin: 0;
+      max-width: 160px;
       color: var(--text-menu);
       font-size: 13px;
       font-weight: 400;
@@ -199,26 +195,21 @@
     }
 
     .menu-note__link {
-      color: var(--text-primary);
-      font-size: inherit;
+      color: inherit;
       text-decoration: underline;
       text-decoration-thickness: 1px;
       text-underline-offset: 3px;
       cursor: pointer;
-      transition: opacity 160ms ease;
+      transition: color 160ms ease;
     }
 
     .menu-note__link:hover {
-      opacity: 0.6;
-    }
-
-    .menu-note__link:active {
-      opacity: 0.4;
+      color: var(--text-primary);
     }
 
     .menu-note__link:focus-visible {
       outline: 2px solid var(--apple-blue);
-      outline-offset: 4px;
+      outline-offset: 2px;
       border-radius: 2px;
     }
 
@@ -450,7 +441,7 @@
       }
 
       .site-navigation {
-        width: min(100%, 740px);
+        width: min(100%, 650px);
         justify-self: start;
       }
     }
@@ -580,15 +571,9 @@
       "Ещё одна",
     ];
 
-    const optionsItems = [
-      "Заглушка",
-      "Ещё одна",
-      "Заглушка",
-    ];
-
     const accountItems = [
       "Мои интересы",
-      "Сохраненные",
+      "Сохранённые",
     ];
 
     const socialItems = [
@@ -613,43 +598,24 @@
 
     const menuColumns = [
       { title: "Практика", items: practiceItems },
-      { title: "Опции", items: optionsItems },
+      { title: "Аккаунт", items: accountItems },
       {
         title: "Награды",
         note: [
           {
-            text: "Награды можно получить за разные активности, если интересно — ",
+            text: "Награды можно получить за разные активности, если интересно, ",
           },
-          { text: "ознакомься подробнее", link: true },
+          {
+            text: "ознакомься подробнее",
+            href: "./",
+          },
         ],
       },
-      { title: "Аккаунт", items: accountItems },
       { title: "Соушл", items: socialItems },
       { title: "API", items: apiItems },
     ];
 
     const navigation = document.querySelector("#site-navigation");
-
-    function createMenuNote(segments) {
-      const paragraph = document.createElement("p");
-      paragraph.className = "menu-note";
-
-      segments.forEach((segment) => {
-        if (segment.link) {
-          const link = document.createElement("a");
-          link.className = "menu-note__link";
-          link.href = segment.href || "./";
-          link.textContent = segment.text;
-          paragraph.append(link);
-        } else {
-          const text = document.createElement("span");
-          text.textContent = segment.text;
-          paragraph.append(text);
-        }
-      });
-
-      return paragraph;
-    }
 
     menuColumns.forEach((column, index) => {
       const group = document.createElement("section");
@@ -661,52 +627,65 @@
       heading.textContent = column.title;
 
       group.setAttribute("aria-labelledby", heading.id);
-      group.append(heading);
 
-      if (Array.isArray(column.items) && column.items.length > 0) {
-        const list = document.createElement("ul");
-        list.className = "menu-list";
+      if (column.note) {
+        const note = document.createElement("p");
+        note.className = "menu-note";
 
-        column.items.forEach((item) => {
-          const entry = typeof item === "string"
-            ? { label: item }
-            : item;
-
-          const listItem = document.createElement("li");
-          const link = document.createElement("a");
-
-          link.className = "menu-link";
-          link.href = entry.href || "./";
-
-          if (entry.external) {
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
+        column.note.forEach((segment) => {
+          if (segment.href) {
+            const link = document.createElement("a");
+            link.className = "menu-note__link";
+            link.href = segment.href;
+            link.textContent = segment.text;
+            note.append(link);
+          } else {
+            note.append(document.createTextNode(segment.text));
           }
-
-          if (entry.arrow) {
-            const arrow = document.createElement("span");
-            arrow.className = "menu-arrow";
-            arrow.setAttribute("aria-hidden", "true");
-            arrow.textContent = "↗";
-            link.append(arrow);
-          }
-
-          const label = document.createElement("span");
-          label.className = "menu-link__label";
-          label.textContent = entry.label;
-
-          link.append(label);
-          listItem.append(link);
-          list.append(listItem);
         });
 
-        group.append(list);
+        group.append(heading, note);
+        navigation.append(group);
+        return;
       }
 
-      if (Array.isArray(column.note)) {
-        group.append(createMenuNote(column.note));
-      }
+      const list = document.createElement("ul");
+      list.className = "menu-list";
 
+      column.items.forEach((item) => {
+        const entry = typeof item === "string"
+          ? { label: item }
+          : item;
+
+        const listItem = document.createElement("li");
+        const link = document.createElement("a");
+
+        link.className = "menu-link";
+        link.href = entry.href || "./";
+
+        if (entry.external) {
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
+
+        if (entry.arrow) {
+          const arrow = document.createElement("span");
+          arrow.className = "menu-arrow";
+          arrow.setAttribute("aria-hidden", "true");
+          arrow.textContent = "↗";
+          link.append(arrow);
+        }
+
+        const label = document.createElement("span");
+        label.className = "menu-link__label";
+        label.textContent = entry.label;
+
+        link.append(label);
+        listItem.append(link);
+        list.append(listItem);
+      });
+
+      group.append(heading, list);
       navigation.append(group);
     });
 
@@ -1251,6 +1230,3 @@
   </script>
 </body>
 </html>
-```
-
-Порядок столбцов теперь такой: **Практика · Опции · Награды · Аккаунт · Соушл · API**. Если хочешь другой порядок — просто поменяй элементы в массиве `menuColumns`.
