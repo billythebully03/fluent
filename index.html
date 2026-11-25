@@ -1,26 +1,20 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="theme-color" content="#ffffff" />
-
-  <title>Fluent — английский без зубрёжки</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>Fluent — практика английского</title>
 
   <style>
     :root {
       color-scheme: light;
-
-      --background: #ffffff;
-      --surface-soft: #f5f5f7;
-      --text-primary: #1d1d1f;
-      --text-secondary: #6e6e73;
-      --text-menu: rgba(29, 29, 31, 0.7);
-      --apple-blue: #0071e3;
-      --subtle-border: rgba(29, 29, 31, 0.1);
-
-      --content-width: 1100px;
+      --text: #1d1d1f;
+      --secondary: #6e6e73;
+      --footer-bg: #f5f5f7;
+      --blue: #0071e3;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+        "Helvetica Neue", Arial, sans-serif;
     }
 
     *,
@@ -30,66 +24,47 @@
     }
 
     html {
-      min-height: 100%;
-      background: var(--background);
-      scrollbar-gutter: stable;
+      scroll-behavior: smooth;
+      overflow-x: clip;
     }
 
     body {
-      min-height: 100%;
       margin: 0;
+      min-width: 320px;
       overflow-x: clip;
-      background: var(--background);
-      color: var(--text-primary);
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "SF Pro Text",
-        "Helvetica Neue",
-        Arial,
-        sans-serif;
-      font-size: 15px;
+      background: #fff;
+      color: var(--text);
+      font-family: var(--font);
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
+    }
+
+    a {
+      color: inherit;
     }
 
     img {
       -webkit-user-drag: none;
-      -webkit-user-select: none;
       user-select: none;
     }
 
-    a {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .page-shell {
-      display: flex;
-      flex-direction: column;
-      width: min(var(--content-width), calc(100% - 80px));
-      min-height: 100vh;
-      min-height: 100svh;
-      margin-inline: auto;
-      padding-top: 88px;
-    }
-
-    .site-main {
+    .header-layout {
+      width: min(1160px, calc(100% - 72px));
+      margin: 0 auto;
+      padding: 38px 0 48px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 650px;
-      column-gap: clamp(32px, 4vw, 44px);
+      grid-template-columns: minmax(280px, 1fr) 650px;
+      column-gap: 38px;
       align-items: start;
     }
 
-    .brand-block {
+    .brand-area {
       max-width: 440px;
     }
 
-    .brand {
+    .brand-link {
       display: inline-flex;
       align-items: center;
-      width: fit-content;
-      line-height: 0;
       text-decoration: none;
     }
 
@@ -97,325 +72,227 @@
       display: block;
       width: auto;
       height: 46px;
-      max-width: 260px;
       object-fit: contain;
-      object-position: left center;
-    }
-
-    .brand:focus-visible {
-      outline: 2px solid var(--apple-blue);
-      outline-offset: 6px;
-      border-radius: 4px;
     }
 
     .tagline {
-      max-width: 410px;
-      margin: 21px 0 0;
-      color: var(--text-secondary);
+      max-width: 415px;
+      margin: 19px 0 0;
+      color: #515156;
       font-size: 17px;
       font-weight: 400;
-      line-height: 1.5;
+      line-height: 1.45;
       letter-spacing: -0.015em;
     }
 
-    .site-navigation {
-      display: grid;
+    .main-nav {
       width: 650px;
+      max-width: 100%;
+      justify-self: end;
+    }
+
+    .menu-grid {
+      display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       column-gap: 18px;
-      justify-self: end;
+      row-gap: 24px;
     }
 
     .menu-column {
       min-width: 0;
     }
 
-    .menu-heading {
-      margin: 0 0 16px;
-      color: var(--text-primary);
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 1.4;
-      letter-spacing: -0.01em;
-      text-align: left;
+    .menu-title {
+      margin: 0 0 11px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
     }
 
-    .menu-list {
+    .menu-links {
       display: grid;
-      gap: 9px;
+      gap: 7px;
       margin: 0;
       padding: 0;
       list-style: none;
     }
 
-    .menu-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      width: fit-content;
-      max-width: 100%;
-      color: var(--text-menu);
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 1.45;
-      letter-spacing: -0.01em;
-      text-decoration: none;
-      cursor: pointer;
-      transition: color 160ms ease, opacity 160ms ease;
-    }
-
-    .menu-link:hover {
-      color: var(--text-primary);
-    }
-
-    .menu-link:active {
-      opacity: 0.55;
-    }
-
-    .menu-link:focus-visible,
-    .menu-note__link:focus-visible {
-      outline: 2px solid var(--apple-blue);
-      outline-offset: 4px;
-      border-radius: 2px;
-    }
-
-    .menu-link__label {
-      min-width: 0;
-      overflow-wrap: anywhere;
-    }
-
-    .menu-arrow {
-      flex: none;
-      font-size: 12px;
-      line-height: 1;
-    }
-
-    .menu-note {
-      max-width: 150px;
-      margin: 0;
-      color: var(--text-menu);
+    .menu-links a {
+      color: var(--secondary);
       font-size: 13px;
       font-weight: 400;
-      line-height: 1.55;
-      letter-spacing: -0.01em;
-    }
-
-    .menu-note__link {
-      color: inherit;
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 3px;
-      cursor: pointer;
+      line-height: 1.4;
+      text-decoration: none;
       transition: color 160ms ease;
     }
 
-    .menu-note__link:hover {
-      color: var(--text-primary);
+    .menu-links a:hover {
+      color: var(--text);
     }
 
-    /*
-      Нижняя графическая часть страницы остаётся на белом фоне:
-      бегущая строка и decorative image выровнены по ширине контента.
-    */
-    .page-end {
+    .menu-links .social-link::before {
+      content: "↗";
+      display: inline-block;
+      margin-right: 6px;
+      color: #8e8e93;
+      font-size: 11px;
+      transform: translateY(-1px);
+    }
+
+    .award-note {
+      margin: 0;
+      color: var(--secondary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .award-note a {
+      text-decoration: underline;
+      text-decoration-color: #8e8e93;
+      text-underline-offset: 3px;
+    }
+
+    .ticker-section {
       width: 100%;
-      margin-top: auto;
-      padding-block: clamp(88px, 13vh, 140px) 42px;
+      margin: 0;
     }
 
-    /* Бегущая строка */
-    .ticker {
-      --ticker-edge-width: clamp(58px, 11vw, 122px);
-
+    .ticker-viewport {
       position: relative;
-      isolation: isolate;
+      display: flex;
       width: 100%;
-      height: 52px;
-      margin-bottom: 18px;
+      height: 108px;
+      align-items: center;
       overflow: hidden;
-      overscroll-behavior-x: none;
       background: linear-gradient(
-        to right,
-        #ffffff 0%,
-        var(--surface-soft) 11%,
-        var(--surface-soft) 89%,
-        #ffffff 100%
+        90deg,
+        #fff 0%,
+        var(--footer-bg) 17%,
+        var(--footer-bg) 83%,
+        #fff 100%
       );
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
-
-    .ticker__viewport {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: 52px;
-      overflow: hidden;
-      overscroll-behavior-x: none;
-      touch-action: pan-y;
       cursor: grab;
-      -webkit-user-select: none;
+      touch-action: pan-y;
+      overscroll-behavior-x: none;
       user-select: none;
-      -webkit-touch-callout: none;
+      -webkit-user-select: none;
     }
 
-    .ticker__viewport:focus-visible {
-      outline: 2px solid var(--apple-blue);
-      outline-offset: -2px;
-    }
-
-    .ticker__viewport.is-dragging {
+    .ticker-viewport.is-dragging {
       cursor: grabbing;
     }
 
-    .ticker__viewport,
-    .ticker__viewport * {
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
+    .ticker-viewport:focus-visible {
+      outline: 2px solid rgb(0 113 227 / 35%);
+      outline-offset: -4px;
     }
 
-    .ticker__track {
+    .ticker-track {
+      position: relative;
+      z-index: 1;
       display: flex;
       width: max-content;
-      min-width: max-content;
-      height: 100%;
-      align-items: stretch;
-      animation: ticker-scroll var(--ticker-duration, 52s) linear infinite;
+      min-width: 100%;
+      flex: 0 0 auto;
+      align-items: center;
+      animation-name: ticker-scroll;
+      animation-duration: var(--ticker-duration, 70s);
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
       animation-play-state: running;
       will-change: transform;
     }
 
-    .ticker__group {
+    .ticker-viewport:hover .ticker-track {
+      animation-play-state: paused;
+    }
+
+    .ticker-copy {
       display: flex;
       flex: 0 0 auto;
       align-items: center;
-      gap: 18px;
-      height: 100%;
-      padding-inline: 24px;
-      white-space: nowrap;
-    }
-
-    .ticker__text {
-      color: #5f5f64;
-      font-size: 13px;
+      gap: 64px;
+      padding-right: 64px;
+      color: #3f3f44;
+      font-size: 16px;
       font-weight: 400;
-      line-height: 1.45;
+      line-height: 1.5;
       letter-spacing: -0.01em;
       white-space: nowrap;
     }
 
-    .ticker__separator {
-      flex: none;
-      color: #a1a1a6;
-      font-size: 13px;
-      line-height: 1;
+    .ticker-copy span {
+      flex: 0 0 auto;
     }
 
-    .ticker__edge {
+    .ticker-blur {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      bottom: 0;
+      background: rgb(255 255 255 / 1%);
+      pointer-events: none;
+    }
+
+    .ticker-blur--soft {
+      width: 220px;
+      -webkit-backdrop-filter: blur(1px);
+      backdrop-filter: blur(1px);
+    }
+
+    .ticker-blur--medium {
+      width: 145px;
+      -webkit-backdrop-filter: blur(2.8px);
+      backdrop-filter: blur(2.8px);
+    }
+
+    .ticker-blur--strong {
+      width: 78px;
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+    }
+
+    .ticker-blur--left {
+      left: 0;
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 28%, transparent 100%);
+      mask-image: linear-gradient(90deg, #000 0%, #000 28%, transparent 100%);
+    }
+
+    .ticker-blur--right {
+      right: 0;
+      -webkit-mask-image: linear-gradient(270deg, #000 0%, #000 28%, transparent 100%);
+      mask-image: linear-gradient(270deg, #000 0%, #000 28%, transparent 100%);
+    }
+
+    .ticker-edge {
       position: absolute;
       z-index: 3;
       top: 0;
       bottom: 0;
-      width: var(--ticker-edge-width);
+      width: 170px;
       pointer-events: none;
-      --edge-direction: to right;
     }
 
-    .ticker__edge--left {
+    .ticker-edge--left {
       left: 0;
-    }
-
-    .ticker__edge--right {
-      right: 0;
-      --edge-direction: to left;
-    }
-
-    .ticker__blur-band {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      z-index: var(--band-layer);
-      width: var(--band-width);
       background: linear-gradient(
-        var(--edge-direction),
-        rgba(255, 255, 255, var(--veil)) 0%,
-        rgba(255, 255, 255, 0) 100%
-      );
-      -webkit-backdrop-filter: blur(var(--blur));
-      backdrop-filter: blur(var(--blur));
-      -webkit-mask-image: linear-gradient(
-        var(--edge-direction),
-        #000 0%,
-        rgba(0, 0, 0, 0.72) 52%,
-        transparent 100%
-      );
-      mask-image: linear-gradient(
-        var(--edge-direction),
-        #000 0%,
-        rgba(0, 0, 0, 0.72) 52%,
-        transparent 100%
+        90deg,
+        #fff 0%,
+        rgb(255 255 255 / 82%) 28%,
+        rgb(255 255 255 / 0%) 100%
       );
     }
 
-    .ticker__blur-band--soft {
-      --band-width: 100%;
-      --band-layer: 1;
-      --blur: 1px;
-      --veil: 0.12;
-    }
-
-    .ticker__blur-band--medium {
-      --band-width: 68%;
-      --band-layer: 2;
-      --blur: 2.8px;
-      --veil: 0.22;
-    }
-
-    .ticker__blur-band--strong {
-      --band-width: 40%;
-      --band-layer: 3;
-      --blur: 5px;
-      --veil: 0.52;
-    }
-
-    .ticker__edge--right .ticker__blur-band {
+    .ticker-edge--right {
       right: 0;
-      left: auto;
-    }
-
-    .ticker--static .ticker__track,
-    .ticker--reduced .ticker__track {
-      animation: none;
-      transform: none;
-    }
-
-    .ticker:hover .ticker__track,
-    .ticker:focus-within .ticker__track,
-    .ticker.is-paused .ticker__track {
-      animation-play-state: paused;
-    }
-
-    .ticker--reduced .ticker__viewport {
-      overflow-x: auto;
-      overflow-y: hidden;
-      scrollbar-width: none;
-      touch-action: pan-x pan-y;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .ticker--reduced .ticker__viewport::-webkit-scrollbar {
-      display: none;
-    }
-
-    .footer-image {
-      display: block;
-      width: 100%;
-      max-width: 100%;
-      height: auto;
-      margin-inline: auto;
+      background: linear-gradient(
+        270deg,
+        #fff 0%,
+        rgb(255 255 255 / 82%) 28%,
+        rgb(255 255 255 / 0%) 100%
+      );
     }
 
     @keyframes ticker-scroll {
@@ -428,273 +305,189 @@
       }
     }
 
-    /* Подвал */
+    .footer-art-wrap {
+      position: relative;
+      width: min(1100px, calc(100% - 64px));
+      margin: 58px auto 0;
+      line-height: 0;
+    }
+
+    .footer-art {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .back-to-top {
+      position: absolute;
+      right: clamp(14px, 2.5vw, 30px);
+      bottom: clamp(12px, 2.5vw, 26px);
+      z-index: 2;
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 15px;
+      border: 0;
+      border-radius: 999px;
+      outline: none;
+      background: rgb(255 255 255 / 48%);
+      color: #3a3a3c;
+      font: 500 13px/1 var(--font);
+      white-space: nowrap;
+      cursor: pointer;
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      transition: background-color 180ms ease, transform 180ms ease;
+    }
+
+    .back-to-top:hover {
+      background: rgb(255 255 255 / 66%);
+      transform: translateY(-1px);
+    }
+
+    .back-to-top:focus-visible {
+      background: rgb(255 255 255 / 72%);
+    }
+
+    .back-to-top svg {
+      display: block;
+      width: 15px;
+      height: 15px;
+      flex: 0 0 auto;
+    }
+
+    .back-to-top svg path {
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.7;
+    }
+
     .site-footer {
       width: 100%;
-      background: var(--surface-soft);
-      color: var(--text-primary);
-    }
-
-    .site-footer__inner {
-      width: min(var(--content-width), calc(100% - 80px));
-      margin-inline: auto;
-      padding-block: 72px 30px;
-    }
-
-    .footer-content {
-      min-height: 280px;
-    }
-
-    .footer-loading,
-    .footer-load-error {
       margin: 0;
-      color: var(--text-secondary);
-      font-size: 14px;
-      line-height: 1.6;
+      padding: 42px 0 48px;
+      background: var(--footer-bg);
     }
 
-    .footer-intro {
-      display: grid;
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-      gap: clamp(40px, 7vw, 88px);
-      align-items: end;
-      padding-bottom: 38px;
-      border-bottom: 1px solid var(--subtle-border);
+    .footer-inner {
+      width: min(1100px, calc(100% - 64px));
+      margin: 0 auto;
     }
 
-    .footer-eyebrow {
-      margin: 0 0 15px;
-      color: #86868b;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .footer-title {
-      max-width: 520px;
-      margin: 0;
-      color: var(--text-primary);
-      font-size: clamp(30px, 4vw, 43px);
-      font-weight: 500;
-      line-height: 1.08;
-      letter-spacing: -0.045em;
-    }
-
-    .footer-intro__lead {
-      max-width: 540px;
-      margin: 0;
-      color: #515154;
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 1.7;
-      letter-spacing: -0.012em;
-    }
-
-    .footer-articles {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: clamp(36px, 6vw, 76px);
-      row-gap: 0;
-      padding-top: 8px;
-    }
-
-    .footer-article {
-      padding-block: 25px 26px;
-      border-bottom: 1px solid var(--subtle-border);
-    }
-
-    .footer-article h3 {
-      margin: 0 0 10px;
-      color: #2d2d30;
-      font-size: 16px;
-      font-weight: 550;
-      line-height: 1.4;
-      letter-spacing: -0.02em;
-    }
-
-    .footer-article p {
-      margin: 0;
-      color: #626267;
-      font-size: 14px;
+    .footer-copy p {
+      margin: 0 0 17px;
+      color: #5c5c61;
+      font-size: 15px;
       font-weight: 400;
       line-height: 1.72;
       letter-spacing: -0.005em;
     }
 
-    .footer-article p + p {
-      margin-top: 9px;
-    }
-
-    .footer-outro {
-      max-width: 760px;
-      margin: 32px 0 0;
-      color: #515154;
-      font-size: 15px;
-      line-height: 1.7;
-      letter-spacing: -0.01em;
-    }
-
-    .footer-bottom {
-      display: flex;
-      justify-content: center;
-      margin-top: 42px;
-      padding-top: 24px;
-      border-top: 1px solid var(--subtle-border);
-    }
-
-    .back-to-top {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      min-height: 38px;
-      padding: 8px 15px;
-      border: 1px solid rgba(29, 29, 31, 0.13);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.54);
-      color: var(--text-secondary);
-      font-size: 13px;
-      line-height: 1;
-      text-decoration: none;
-      transition:
-        color 160ms ease,
-        background-color 160ms ease,
-        border-color 160ms ease;
-    }
-
-    .back-to-top:hover {
-      border-color: rgba(29, 29, 31, 0.22);
-      background: #ffffff;
-      color: var(--text-primary);
-    }
-
-    .back-to-top:focus-visible {
-      outline: 2px solid var(--apple-blue);
-      outline-offset: 3px;
-    }
-
-    .back-to-top__icon {
-      display: block;
-      width: 14px;
-      height: 14px;
-      flex: none;
+    .footer-copy p:last-child {
+      margin-bottom: 0;
     }
 
     @media (max-width: 1080px) {
-      .page-shell {
-        width: min(920px, calc(100% - 64px));
-        padding-top: 62px;
-      }
-
-      .site-main {
+      .header-layout {
         grid-template-columns: minmax(0, 1fr);
-        row-gap: 48px;
+        row-gap: 34px;
       }
 
-      .brand-block {
-        max-width: 440px;
-      }
-
-      .site-navigation {
-        width: min(100%, 650px);
-        justify-self: start;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .footer-intro {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 22px;
-        align-items: start;
-      }
-
-      .footer-title {
-        max-width: 600px;
-      }
-
-      .footer-intro__lead {
-        max-width: 620px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .page-shell {
-        width: calc(100% - 40px);
-        padding-top: 38px;
-      }
-
-      .site-main {
-        row-gap: 40px;
-      }
-
-      .site-navigation {
+      .main-nav {
         width: 100%;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        column-gap: 24px;
-        row-gap: 32px;
+        justify-self: stretch;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .header-layout {
+        width: calc(100% - 40px);
+        padding: 28px 0 34px;
+        row-gap: 30px;
       }
 
       .brand-logo {
-        height: 40px;
+        height: 44px;
       }
 
       .tagline {
+        margin-top: 16px;
         font-size: 16px;
       }
 
-      .page-end {
-        padding-block: 84px 26px;
+      .menu-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 20px;
+        row-gap: 24px;
       }
 
-      .ticker {
-        --ticker-edge-width: 52px;
+      .ticker-viewport {
+        height: 96px;
       }
 
-      .ticker__group {
-        gap: 14px;
-        padding-inline: 18px;
+      .ticker-copy {
+        gap: 46px;
+        padding-right: 46px;
+        font-size: 15px;
       }
 
-      .site-footer__inner {
+      .ticker-blur--soft {
+        width: 160px;
+      }
+
+      .ticker-blur--medium {
+        width: 105px;
+      }
+
+      .ticker-blur--strong {
+        width: 58px;
+      }
+
+      .ticker-edge {
+        width: 130px;
+      }
+
+      .footer-art-wrap,
+      .footer-inner {
         width: calc(100% - 40px);
-        padding-block: 48px 24px;
       }
 
-      .footer-title {
-        font-size: 32px;
+      .footer-art-wrap {
+        margin-top: 42px;
       }
 
-      .footer-intro {
-        padding-bottom: 28px;
+      .back-to-top {
+        right: 10px;
+        bottom: 10px;
+        min-height: 38px;
+        padding: 10px 12px;
+        font-size: 12px;
       }
 
-      .footer-articles {
-        grid-template-columns: minmax(0, 1fr);
+      .site-footer {
+        padding: 32px 0 36px;
       }
 
-      .footer-article {
-        padding-block: 21px 22px;
-      }
-
-      .footer-outro {
-        margin-top: 25px;
-      }
-
-      .footer-bottom {
-        margin-top: 32px;
-        padding-top: 20px;
+      .footer-copy p {
+        margin-bottom: 15px;
+        font-size: 14px;
+        line-height: 1.7;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .ticker__edge {
-        display: none;
+      html {
+        scroll-behavior: auto;
       }
 
-      .back-to-top,
-      .menu-link,
-      .menu-note__link {
+      .ticker-track {
+        animation-play-state: paused !important;
+      }
+
+      .back-to-top {
         transition: none;
       }
     }
@@ -702,803 +495,468 @@
 </head>
 
 <body>
-  <div class="page-shell" id="top">
-    <main class="site-main">
-      <section class="brand-block" aria-label="О Fluent">
-        <a class="brand" href="#top" aria-label="Fluent — главная страница">
+  <header class="site-header" id="top">
+    <div class="header-layout">
+      <div class="brand-area">
+        <a class="brand-link" href="#top" aria-label="Fluent — на главную">
           <img
             class="brand-logo"
             src="./public/fluent.png"
             alt="Fluent"
             draggable="false"
-          />
+          >
         </a>
 
-        <h1 class="tagline">
-          Английский не такой сложный.<br />
-          Зачем зубрить, если можно практиковаться и становиться увереннее?
-        </h1>
-      </section>
+        <p class="tagline">
+          Английский не такой сложный. Зачем зубрить, если можно практиковаться и становиться увереннее?
+        </p>
+      </div>
 
-      <nav
-        class="site-navigation"
-        id="site-navigation"
-        aria-label="Основные разделы"
-      ></nav>
-    </main>
-
-    <div class="page-end">
-      <section
-        class="ticker ticker--static"
-        id="reading-ticker"
-        aria-label="Короткий английский текст для практики"
-      >
-        <div
-          class="ticker__viewport"
-          id="ticker-viewport"
-          tabindex="0"
-          role="region"
-          aria-label="Прокручиваемый английский текст"
-        >
-          <div class="ticker__track" id="ticker-track">
-            <div class="ticker__group">
-              <span class="ticker__text">
-                Small moments can lead to better conversations.
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="ticker__edge ticker__edge--left" aria-hidden="true">
-          <span class="ticker__blur-band ticker__blur-band--soft"></span>
-          <span class="ticker__blur-band ticker__blur-band--medium"></span>
-          <span class="ticker__blur-band ticker__blur-band--strong"></span>
-        </div>
-
-        <div class="ticker__edge ticker__edge--right" aria-hidden="true">
-          <span class="ticker__blur-band ticker__blur-band--soft"></span>
-          <span class="ticker__blur-band ticker__blur-band--medium"></span>
-          <span class="ticker__blur-band ticker__blur-band--strong"></span>
-        </div>
-      </section>
-
-      <img
-        class="footer-image"
-        src="./public/footer.png?v=8"
-        alt=""
-        draggable="false"
-      />
+      <nav class="main-nav" aria-label="Основная навигация">
+        <div class="menu-grid" id="menuGrid"></div>
+      </nav>
     </div>
+  </header>
+
+  <main>
+    <section class="ticker-section" aria-label="Английский текст для чтения">
+      <div
+        class="ticker-viewport"
+        id="tickerViewport"
+        tabindex="0"
+        role="region"
+        aria-label="Бегущая строка с короткой историей на английском. Её можно прокручивать мышью, тачпадом или клавиатурой."
+      >
+        <div class="ticker-track" id="tickerTrack">
+          <div class="ticker-copy" id="tickerCopy"></div>
+          <div class="ticker-copy" id="tickerCopyDuplicate" aria-hidden="true"></div>
+        </div>
+
+        <div class="ticker-blur ticker-blur--soft ticker-blur--left" aria-hidden="true"></div>
+        <div class="ticker-blur ticker-blur--medium ticker-blur--left" aria-hidden="true"></div>
+        <div class="ticker-blur ticker-blur--strong ticker-blur--left" aria-hidden="true"></div>
+
+        <div class="ticker-blur ticker-blur--soft ticker-blur--right" aria-hidden="true"></div>
+        <div class="ticker-blur ticker-blur--medium ticker-blur--right" aria-hidden="true"></div>
+        <div class="ticker-blur ticker-blur--strong ticker-blur--right" aria-hidden="true"></div>
+
+        <div class="ticker-edge ticker-edge--left" aria-hidden="true"></div>
+        <div class="ticker-edge ticker-edge--right" aria-hidden="true"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-art-wrap">
+    <img
+      class="footer-art"
+      src="./public/footer.png?v=8"
+      alt=""
+      draggable="false"
+    >
+
+    <button class="back-to-top" id="backToTop" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"></path>
+      </svg>
+      <span>Вернуть наверх</span>
+    </button>
   </div>
 
-  <footer class="site-footer" aria-label="О проекте Fluent">
-    <div class="site-footer__inner">
-      <div class="footer-content" id="footer-content">
-        <p class="footer-loading">Загружаем заметку о Fluent…</p>
-      </div>
-
-      <div class="footer-bottom">
-        <a class="back-to-top" href="#top">
-          <svg
-            class="back-to-top__icon"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M8 13V3M4.5 6.5 8 3l3.5 3.5"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span>Вернуть наверх</span>
-        </a>
-      </div>
-    </div>
+  <footer class="site-footer" aria-label="О Fluent">
+    <div class="footer-inner footer-copy" id="footerContent"></div>
   </footer>
 
   <script>
-    const practiceItems = [
-      "Слова",
-      "Идиомы",
-      "Ситуации",
-    ];
-
-    const accountItems = [
-      "Мои интересы",
-      "Сохранённые",
-    ];
-
-    const socialItems = [
-      { label: "GitHub", arrow: true },
-      { label: "Telegram", arrow: true },
-    ];
-
-    const apiItems = [
-      {
-        label: "Wikipedia",
-        href: "https://www.mediawiki.org/wiki/API:Main_page",
-        external: true,
-        arrow: true,
-      },
-      {
-        label: "Google Gemini",
-        href: "https://ai.google.dev/gemini-api/docs",
-        external: true,
-        arrow: true,
-      },
-    ];
-
     const menuColumns = [
-      { title: "Практика", items: practiceItems },
-      { title: "Аккаунт", items: accountItems },
+      {
+        title: "Практика",
+        items: [
+          { label: "Слова", href: "#top" },
+          { label: "Идиомы", href: "#top" },
+          { label: "Ситуации", href: "#top" }
+        ]
+      },
+      {
+        title: "Аккаунт",
+        items: [
+          { label: "Мои интересы", href: "#top" },
+          { label: "Сохранённые", href: "#top" }
+        ]
+      },
       {
         title: "Награды",
-        note: [
-          {
-            text: "Награды можно получить за разные активности. Если интересно, ",
-          },
-          {
-            text: "ознакомься подробнее",
-            href: "#top",
-          },
-          {
-            text: ".",
-          },
-        ],
+        type: "awards"
       },
-      { title: "Соушл", items: socialItems },
-      { title: "API", items: apiItems },
+      {
+        title: "Соушл",
+        items: [
+          { label: "GitHub", href: "#top", className: "social-link" },
+          { label: "Telegram", href: "#top", className: "social-link" }
+        ]
+      },
+      {
+        title: "API",
+        items: [
+          {
+            label: "Wikipedia",
+            href: "https://www.mediawiki.org/wiki/API:Main_page",
+            target: "_blank"
+          },
+          {
+            label: "Google Gemini",
+            href: "https://ai.google.dev/gemini-api/docs",
+            target: "_blank"
+          }
+        ]
+      }
     ];
 
-    const navigation = document.querySelector("#site-navigation");
+    const menuGrid = document.getElementById("menuGrid");
 
-    menuColumns.forEach((column, index) => {
-      const group = document.createElement("section");
-      group.className = "menu-column";
+    menuColumns.forEach((column) => {
+      const section = document.createElement("section");
+      section.className = "menu-column";
 
-      const heading = document.createElement("h2");
-      heading.className = "menu-heading";
-      heading.id = `menu-heading-${index}`;
-      heading.textContent = column.title;
+      const title = document.createElement("h2");
+      title.className = "menu-title";
+      title.textContent = column.title;
+      section.appendChild(title);
 
-      group.setAttribute("aria-labelledby", heading.id);
-
-      if (column.note) {
+      if (column.type === "awards") {
         const note = document.createElement("p");
-        note.className = "menu-note";
+        note.className = "award-note";
+        note.appendChild(
+          document.createTextNode(
+            "Награды можно получить за разные активности. Если интересно, "
+          )
+        );
 
-        column.note.forEach((segment) => {
-          if (segment.href) {
-            const link = document.createElement("a");
-            link.className = "menu-note__link";
-            link.href = segment.href;
-            link.textContent = segment.text;
-            note.append(link);
-          } else {
-            note.append(document.createTextNode(segment.text));
+        const link = document.createElement("a");
+        link.href = "#top";
+        link.textContent = "ознакомься подробнее";
+        note.appendChild(link);
+        note.appendChild(document.createTextNode("."));
+
+        section.appendChild(note);
+      } else {
+        const list = document.createElement("ul");
+        list.className = "menu-links";
+
+        column.items.forEach((item) => {
+          const listItem = document.createElement("li");
+          const link = document.createElement("a");
+
+          link.href = item.href;
+          link.textContent = item.label;
+
+          if (item.className) {
+            link.className = item.className;
           }
+
+          if (item.target) {
+            link.target = item.target;
+            link.rel = "noopener noreferrer";
+          }
+
+          listItem.appendChild(link);
+          list.appendChild(listItem);
         });
 
-        group.append(heading, note);
-        navigation.append(group);
-        return;
+        section.appendChild(list);
       }
 
-      const list = document.createElement("ul");
-      list.className = "menu-list";
-
-      column.items.forEach((item) => {
-        const entry = typeof item === "string"
-          ? { label: item }
-          : item;
-
-        const listItem = document.createElement("li");
-        const link = document.createElement("a");
-
-        link.className = "menu-link";
-        link.href = entry.href || "#top";
-
-        if (entry.external) {
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-        }
-
-        if (entry.arrow) {
-          const arrow = document.createElement("span");
-          arrow.className = "menu-arrow";
-          arrow.setAttribute("aria-hidden", "true");
-          arrow.textContent = "↗";
-          link.append(arrow);
-        }
-
-        const label = document.createElement("span");
-        label.className = "menu-link__label";
-        label.textContent = entry.label;
-
-        link.append(label);
-        listItem.append(link);
-        list.append(listItem);
-      });
-
-      group.append(heading, list);
-      navigation.append(group);
+      menuGrid.appendChild(section);
     });
 
-    /*
-      Оригинальные короткие истории для прототипа.
-      При загрузке выбирается случайная история и обычно
-      второй или третий абзац.
-    */
-    const readingStories = [
-      [
-        "When Maya moved to a new city, she decided to walk home from work instead of taking the bus.",
-        "At first, she used the same quiet street every day. One evening, she noticed a small bookstore with a handwritten sign in the window. It said, “Tell us what you’re reading.”",
-        "The next day, Maya went inside and asked the owner for a recommendation. They talked about mystery novels, favorite characters, and the best places to get coffee nearby.",
-        "Maya left with a book and three new places to visit. Her English wasn’t perfect, but the conversation felt easy.",
-      ],
-      [
-        "On Saturday mornings, Ben liked to visit the farmers market before it got busy.",
-        "One weekend, he stopped at a table full of fresh peaches. The seller asked if he wanted to try one, and Ben said yes. It was sweeter than he expected.",
-        "He asked how the peaches were grown and learned that the farm was just outside town. The seller also shared a simple recipe for peach pie.",
-        "Ben bought a small bag and went home smiling. He had practiced English, learned something new, and found dessert for the evening.",
-      ],
-      [
-        "Olivia was nervous about joining her first neighborhood book club.",
-        "She almost stayed home, but she had already finished the book, so she went. The group was smaller than she expected, and everyone took turns sharing one thing they liked.",
-        "When it was Olivia’s turn, she talked about the main character and asked the others what they thought. A woman across the table agreed and added an idea Olivia hadn’t considered.",
-        "By the end of the evening, Olivia had shared her opinion and made plans to come back. She realized a good conversation often starts with one simple question.",
-      ],
-      [
-        "A few months ago, Daniel started taking a different route to the office.",
-        "The new street was a little longer, but it passed a quiet park. Most mornings, he saw an older man feeding birds near the fountain.",
-        "One day, Daniel asked what kind of birds they were. The man told him their names and pointed out a bright red cardinal in a tree. Daniel listened, then asked how long the birds had visited the park.",
-        "Now Daniel leaves home ten minutes earlier. The walk gives him fresh air and a small daily conversation to look forward to.",
-      ],
-    ];
-
-    const ticker = document.querySelector("#reading-ticker");
-    const tickerViewport = document.querySelector("#ticker-viewport");
-    const tickerTrack = document.querySelector("#ticker-track");
-    const reducedMotionQuery = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    );
-
-    const TICKER_SPEED = 24;
-    const MIN_TICKER_CYCLE_WIDTH = 1180;
-
-    let currentTickerText = "";
-    let tickerAnimation = null;
-    let pointerDrag = null;
-    let resumeTimer = null;
-    let resizeTimer = null;
-
-    function getTickerAnimation() {
-      if (tickerAnimation && tickerAnimation.effect) {
-        return tickerAnimation;
-      }
-
-      tickerAnimation = tickerTrack.getAnimations()[0] ?? null;
-      return tickerAnimation;
-    }
-
-    function getTickerAnimationTime() {
-      const animation = getTickerAnimation();
-      const time = Number(animation?.currentTime);
-
-      return Number.isFinite(time) ? time : 0;
-    }
-
-    function shouldKeepTickerPaused() {
-      return (
-        ticker.matches(":hover") ||
-        ticker.contains(document.activeElement) ||
-        pointerDrag !== null
-      );
-    }
-
-    function pauseTicker() {
-      ticker.classList.add("is-paused");
-      getTickerAnimation()?.pause();
-    }
-
-    function resumeTickerIfAllowed() {
-      if (shouldKeepTickerPaused()) {
-        pauseTicker();
-        return;
-      }
-
-      ticker.classList.remove("is-paused");
-
-      if (!reducedMotionQuery.matches) {
-        getTickerAnimation()?.play();
-      }
-    }
-
-    function scheduleResumeIfIdle() {
-      window.clearTimeout(resumeTimer);
-
-      resumeTimer = window.setTimeout(() => {
-        if (!shouldKeepTickerPaused()) {
-          resumeTickerIfAllowed();
+    fetch("./footer-content.html", { cache: "no-cache" })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Не удалось загрузить текст подвала.");
         }
-      }, 1600);
-    }
-
-    function setTickerAnimationTime(time) {
-      const animation = getTickerAnimation();
-
-      if (!animation) {
-        return;
-      }
-
-      pauseTicker();
-      animation.currentTime = Math.max(0, time);
-    }
-
-    function changeTickerPositionByPixels(delta) {
-      if (!delta) {
-        return;
-      }
-
-      pauseTicker();
-
-      if (reducedMotionQuery.matches) {
-        const maxScroll = Math.max(
-          0,
-          tickerViewport.scrollWidth - tickerViewport.clientWidth
-        );
-
-        tickerViewport.scrollLeft = Math.min(
-          maxScroll,
-          Math.max(0, tickerViewport.scrollLeft + delta)
-        );
-
-        scheduleResumeIfIdle();
-        return;
-      }
-
-      const currentTime = getTickerAnimationTime();
-      const timeDelta = (delta / TICKER_SPEED) * 1000;
-
-      setTickerAnimationTime(currentTime + timeDelta);
-      scheduleResumeIfIdle();
-    }
-
-    function chooseStartingParagraph(paragraphCount) {
-      if (paragraphCount <= 1) {
-        return 0;
-      }
-
-      const preferredParagraphs = [1, 2].filter(
-        (index) => index < paragraphCount
-      );
-
-      if (
-        preferredParagraphs.length > 0 &&
-        Math.random() < 0.72
-      ) {
-        const randomIndex = Math.floor(
-          Math.random() * preferredParagraphs.length
-        );
-
-        return preferredParagraphs[randomIndex];
-      }
-
-      return Math.floor(Math.random() * paragraphCount);
-    }
-
-    function limitExcerpt(text, maxLength = 420) {
-      if (text.length <= maxLength) {
-        return text;
-      }
-
-      const beginning = text.slice(0, maxLength);
-      const lastSentenceEnd = Math.max(
-        beginning.lastIndexOf(". "),
-        beginning.lastIndexOf("! "),
-        beginning.lastIndexOf("? ")
-      );
-
-      if (lastSentenceEnd > maxLength * 0.55) {
-        return beginning.slice(0, lastSentenceEnd + 1).trim();
-      }
-
-      const lastSpace = beginning.lastIndexOf(" ");
-      const cutAt = lastSpace > 0 ? lastSpace : maxLength;
-
-      return `${beginning.slice(0, cutAt).trim()}…`;
-    }
-
-    function makeExcerpt(paragraphs, startIndex) {
-      return limitExcerpt(paragraphs.slice(startIndex).join(" "));
-    }
-
-    function createTickerText(text) {
-      const item = document.createElement("span");
-      item.className = "ticker__text";
-      item.textContent = text;
-      return item;
-    }
-
-    function appendTickerCopy(group, text) {
-      const separator = document.createElement("span");
-      separator.className = "ticker__separator";
-      separator.setAttribute("aria-hidden", "true");
-      separator.textContent = "·";
-
-      group.append(separator, createTickerText(text));
-    }
-
-    function createTickerGroup(text) {
-      const group = document.createElement("div");
-      group.className = "ticker__group";
-      group.append(createTickerText(text));
-      return group;
-    }
-
-    function renderTickerText(text) {
-      currentTickerText = text;
-
-      tickerTrack.getAnimations().forEach((animation) => {
-        animation.cancel();
+        return response.text();
+      })
+      .then((markup) => {
+        document.getElementById("footerContent").innerHTML = markup;
+      })
+      .catch((error) => {
+        console.error(error);
       });
 
-      tickerAnimation = null;
-      ticker.classList.add("ticker--static");
-      ticker.classList.remove("ticker--reduced", "is-paused");
-      tickerTrack.replaceChildren();
-      tickerViewport.scrollLeft = 0;
+    const backToTopButton = document.getElementById("backToTop");
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-      const firstGroup = createTickerGroup(text);
-      tickerTrack.append(firstGroup);
+    backToTopButton.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: reducedMotionQuery.matches ? "auto" : "smooth"
+      });
+    });
 
-      if (reducedMotionQuery.matches) {
-        ticker.classList.add("ticker--reduced");
-        return;
-      }
+    const stories = [
+      [
+        "For the first few days in his new apartment, Daniel took the wrong street on his way home.",
+        "On Friday, he noticed a little bakery on the corner and decided to stop for a coffee before catching the bus.",
+        "The owner remembered him the next morning and asked how he liked the neighborhood. Daniel realized he was beginning to feel at home.",
+        "After that, he took a different route whenever he had time. The walk was longer, but he kept finding places he wanted to come back to."
+      ],
+      [
+        "Maya usually spent her lunch break at her desk, but one afternoon she decided to walk around the block.",
+        "She found a small park behind the library and sat on a bench with her sandwich. A man nearby was teaching his dog to wait before crossing the path.",
+        "The dog did not get it right the first time, but the man laughed and tried again. Maya stayed longer than she planned.",
+        "The next day, she brought a book with her. Soon the park became part of her routine, even on busy weeks."
+      ],
+      [
+        "When Chris started learning to cook, he chose recipes with only a few ingredients.",
+        "One evening, he made pasta for a friend and forgot to buy tomatoes. Instead of ordering food, they looked through the kitchen and used what was already there.",
+        "The meal was not exactly what the recipe promised, but it tasted good. His friend asked him to write down how he had made it.",
+        "Chris kept the recipe on the fridge. It reminded him that getting started is often more useful than waiting for the perfect plan."
+      ]
+    ];
 
-      const targetWidth = Math.max(
-        tickerViewport.clientWidth + 100,
-        MIN_TICKER_CYCLE_WIDTH
+    const tickerViewport = document.getElementById("tickerViewport");
+    const tickerTrack = document.getElementById("tickerTrack");
+    const tickerCopy = document.getElementById("tickerCopy");
+    const tickerCopyDuplicate = document.getElementById("tickerCopyDuplicate");
+
+    const selectedStory = stories[Math.floor(Math.random() * stories.length)];
+    const startIndex = Math.random() < 0.5 ? 1 : 2;
+    const activeParagraphs = selectedStory.slice(startIndex);
+
+    let tickerAnimation = null;
+    let tickerDurationMs = 44000;
+    let tickerCopyWidth = 1;
+    let hoveringTicker = false;
+    let draggingTicker = false;
+    let keyboardFocusedTicker = false;
+    let dragStartX = 0;
+    let dragStartTime = 0;
+    let activePointerId = null;
+    let resizeTimer = null;
+
+    function renderTickerCopy() {
+      tickerCopy.replaceChildren();
+
+      let paragraphIndex = 0;
+      const minimumWidth = tickerViewport.clientWidth + 240;
+
+      do {
+        const phrase = document.createElement("span");
+        phrase.textContent =
+          activeParagraphs[paragraphIndex % activeParagraphs.length];
+
+        tickerCopy.appendChild(phrase);
+        paragraphIndex += 1;
+      } while (
+        tickerCopy.getBoundingClientRect().width < minimumWidth &&
+        paragraphIndex < 60
       );
 
-      let copyCount = 1;
-
-      while (
-        firstGroup.scrollWidth < targetWidth &&
-        copyCount < 10
-      ) {
-        appendTickerCopy(firstGroup, text);
-        copyCount += 1;
-      }
-
-      const secondGroup = firstGroup.cloneNode(true);
-      secondGroup.setAttribute("aria-hidden", "true");
-      tickerTrack.append(secondGroup);
-
-      const cycleWidth = firstGroup.getBoundingClientRect().width;
-      const durationSeconds = Math.max(
-        44,
-        cycleWidth / TICKER_SPEED
+      tickerCopyDuplicate.replaceChildren(
+        ...Array.from(tickerCopy.children, (phrase) => phrase.cloneNode(true))
       );
+
+      tickerCopyWidth = tickerCopy.getBoundingClientRect().width;
+      tickerDurationMs = Math.max(44000, (tickerCopyWidth / 24) * 1000);
 
       tickerTrack.style.setProperty(
         "--ticker-duration",
-        `${durationSeconds.toFixed(2)}s`
+        `${tickerDurationMs / 1000}s`
       );
 
-      requestAnimationFrame(() => {
-        ticker.classList.remove("ticker--static");
-
-        requestAnimationFrame(() => {
-          tickerAnimation = tickerTrack.getAnimations()[0] ?? null;
-
-          if (shouldKeepTickerPaused()) {
-            pauseTicker();
-          }
-        });
-      });
+      requestAnimationFrame(captureTickerAnimation);
     }
 
-    function renderRandomStory() {
-      const storyIndex = Math.floor(
-        Math.random() * readingStories.length
-      );
+    function captureTickerAnimation() {
+      const animations = tickerTrack.getAnimations();
+      tickerAnimation =
+        animations.find((animation) => animation.animationName === "ticker-scroll") ||
+        animations[0] ||
+        null;
 
-      const story = readingStories[storyIndex];
-      const startIndex = chooseStartingParagraph(story.length);
-
-      renderTickerText(makeExcerpt(story, startIndex));
+      updateTickerPlayback();
     }
 
-    function normalizeWheelDelta(delta, event) {
-      if (event.deltaMode === 1) {
-        return delta * 16;
-      }
+    function updateTickerPlayback() {
+      if (!tickerAnimation) return;
 
-      if (event.deltaMode === 2) {
-        return delta * tickerViewport.clientWidth;
-      }
+      const shouldPause =
+        hoveringTicker ||
+        draggingTicker ||
+        keyboardFocusedTicker ||
+        reducedMotionQuery.matches;
 
-      return delta;
+      if (shouldPause) {
+        tickerAnimation.pause();
+      } else {
+        tickerAnimation.play();
+      }
     }
 
-    function handleTickerWheel(event) {
-      const horizontalIntent = event.shiftKey
-        ? event.deltaY !== 0 || event.deltaX !== 0
-        : Math.abs(event.deltaX) > Math.abs(event.deltaY);
+    function getTickerTime() {
+      if (!tickerAnimation) return 0;
 
-      if (!horizontalIntent) {
-        return;
-      }
-
-      const rawDelta = event.shiftKey
-        ? (event.deltaY || event.deltaX)
-        : event.deltaX;
-
-      if (!rawDelta) {
-        return;
-      }
-
-      /*
-        Горизонтальный жест обрабатывается здесь, включая левый край.
-        За пределы строки скролл не передаётся.
-      */
-      if (event.cancelable) {
-        event.preventDefault();
-      }
-
-      event.stopPropagation();
-
-      changeTickerPositionByPixels(
-        normalizeWheelDelta(rawDelta, event)
-      );
+      const currentTime = Number(tickerAnimation.currentTime) || 0;
+      return ((currentTime % tickerDurationMs) + tickerDurationMs) % tickerDurationMs;
     }
 
-    ticker.addEventListener(
-      "wheel",
-      handleTickerWheel,
-      { capture: true, passive: false }
-    );
+    function setTickerTime(time) {
+      if (!tickerAnimation) return;
 
-    ticker.addEventListener("pointerenter", (event) => {
-      if (event.pointerType === "mouse") {
-        pauseTicker();
+      const normalizedTime =
+        ((time % tickerDurationMs) + tickerDurationMs) % tickerDurationMs;
+
+      tickerAnimation.pause();
+      tickerAnimation.currentTime = normalizedTime;
+    }
+
+    function moveTickerByPixels(pixels) {
+      if (!tickerAnimation || tickerCopyWidth <= 0) return;
+
+      const pixelsPerMillisecond = tickerCopyWidth / tickerDurationMs;
+      setTickerTime(getTickerTime() + pixels / pixelsPerMillisecond);
+    }
+
+    tickerViewport.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "touch") {
+        hoveringTicker = true;
+        updateTickerPlayback();
       }
     });
 
-    ticker.addEventListener("pointerleave", (event) => {
-      if (event.pointerType === "mouse") {
-        requestAnimationFrame(resumeTickerIfAllowed);
-      }
-    });
-
-    tickerViewport.addEventListener("focusin", pauseTicker);
-
-    tickerViewport.addEventListener("focusout", () => {
-      requestAnimationFrame(resumeTickerIfAllowed);
-    });
-
-    tickerViewport.addEventListener("keydown", (event) => {
-      const step = Math.max(
-        100,
-        Math.round(tickerViewport.clientWidth * 0.18)
-      );
-
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        changeTickerPositionByPixels(step);
-      } else if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        changeTickerPositionByPixels(-step);
-      } else if (event.key === "Home") {
-        event.preventDefault();
-
-        if (reducedMotionQuery.matches) {
-          tickerViewport.scrollLeft = 0;
-        } else {
-          setTickerAnimationTime(0);
-        }
-      } else if (event.key === "End") {
-        event.preventDefault();
-
-        if (reducedMotionQuery.matches) {
-          tickerViewport.scrollLeft =
-            tickerViewport.scrollWidth -
-            tickerViewport.clientWidth;
-        } else {
-          const animation = getTickerAnimation();
-          const duration = Number(
-            animation?.effect?.getTiming().duration
-          );
-
-          if (Number.isFinite(duration)) {
-            setTickerAnimationTime(
-              getTickerAnimationTime() + duration / 2
-            );
-          }
-        }
-      }
-    });
-
-    tickerViewport.addEventListener("pointerdown", (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) {
-        return;
-      }
-
-      if (
-        event.pointerType !== "mouse" &&
-        event.pointerType !== "touch"
-      ) {
-        return;
-      }
-
-      pauseTicker();
-
-      pointerDrag = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-        startAnimationTime: getTickerAnimationTime(),
-        startScrollLeft: tickerViewport.scrollLeft,
-        mode: event.pointerType === "mouse"
-          ? "dragging"
-          : "pending",
-      };
-
-      if (event.pointerType === "mouse") {
-        event.preventDefault();
-        tickerViewport.classList.add("is-dragging");
-        tickerViewport.setPointerCapture(event.pointerId);
+    tickerViewport.addEventListener("pointerleave", (event) => {
+      if (event.pointerType !== "touch") {
+        hoveringTicker = false;
+        updateTickerPlayback();
       }
     });
 
     tickerViewport.addEventListener(
-      "pointermove",
+      "wheel",
       (event) => {
-        if (
-          !pointerDrag ||
-          pointerDrag.pointerId !== event.pointerId
-        ) {
-          return;
+        const unit =
+          event.deltaMode === 1
+            ? 32
+            : event.deltaMode === 2
+              ? tickerViewport.clientWidth
+              : 1;
+
+        const deltaX = event.deltaX * unit;
+        const deltaY = event.deltaY * unit;
+        let horizontalDelta = deltaX;
+
+        if (event.shiftKey && Math.abs(horizontalDelta) < 0.5) {
+          horizontalDelta = deltaY;
         }
 
-        const deltaX = event.clientX - pointerDrag.startX;
-        const deltaY = event.clientY - pointerDrag.startY;
+        const isHorizontalGesture =
+          event.shiftKey
+            ? Math.abs(horizontalDelta) > 0.5
+            : Math.abs(deltaX) > 0.5 && Math.abs(deltaX) >= Math.abs(deltaY);
 
-        if (pointerDrag.mode === "pending") {
-          if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 6) {
-            return;
-          }
-
-          /* Не мешаем вертикальному скроллу страницы на телефоне. */
-          if (Math.abs(deltaY) > Math.abs(deltaX)) {
-            pointerDrag = null;
-            resumeTickerIfAllowed();
-            return;
-          }
-
-          pointerDrag.mode = "dragging";
-          tickerViewport.classList.add("is-dragging");
-        }
-
-        if (pointerDrag.mode !== "dragging") {
-          return;
-        }
+        if (!isHorizontalGesture) return;
 
         event.preventDefault();
-
-        if (reducedMotionQuery.matches) {
-          const maxScroll = Math.max(
-            0,
-            tickerViewport.scrollWidth -
-              tickerViewport.clientWidth
-          );
-
-          tickerViewport.scrollLeft = Math.min(
-            maxScroll,
-            Math.max(
-              0,
-              pointerDrag.startScrollLeft - deltaX
-            )
-          );
-
-          return;
-        }
-
-        const timeDelta = (-deltaX / TICKER_SPEED) * 1000;
-
-        setTickerAnimationTime(
-          pointerDrag.startAnimationTime + timeDelta
-        );
+        moveTickerByPixels(horizontalDelta);
       },
       { passive: false }
     );
 
-    function finishPointerDrag(event) {
-      if (
-        !pointerDrag ||
-        pointerDrag.pointerId !== event.pointerId
-      ) {
-        return;
+    tickerViewport.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      draggingTicker = true;
+      activePointerId = event.pointerId;
+      dragStartX = event.clientX;
+      dragStartTime = getTickerTime();
+
+      tickerViewport.classList.add("is-dragging");
+
+      if (tickerViewport.setPointerCapture) {
+        tickerViewport.setPointerCapture(event.pointerId);
       }
 
-      pointerDrag = null;
+      updateTickerPlayback();
+    });
+
+    tickerViewport.addEventListener("pointermove", (event) => {
+      if (!draggingTicker || event.pointerId !== activePointerId) return;
+
+      const distance = event.clientX - dragStartX;
+      moveTickerByPixels(0);
+      setTickerTime(
+        dragStartTime - (distance / tickerCopyWidth) * tickerDurationMs
+      );
+    });
+
+    function finishTickerDrag(event) {
+      if (!draggingTicker) return;
+      if (event && event.pointerId !== activePointerId) return;
+
+      draggingTicker = false;
+      activePointerId = null;
       tickerViewport.classList.remove("is-dragging");
 
-      requestAnimationFrame(resumeTickerIfAllowed);
-    }
-
-    tickerViewport.addEventListener("pointerup", finishPointerDrag);
-    tickerViewport.addEventListener("pointercancel", finishPointerDrag);
-
-    function handleMotionPreferenceChange() {
-      if (currentTickerText) {
-        renderTickerText(currentTickerText);
+      if (
+        event &&
+        tickerViewport.hasPointerCapture &&
+        tickerViewport.hasPointerCapture(event.pointerId)
+      ) {
+        tickerViewport.releasePointerCapture(event.pointerId);
       }
+
+      updateTickerPlayback();
     }
 
-    if (typeof reducedMotionQuery.addEventListener === "function") {
-      reducedMotionQuery.addEventListener(
-        "change",
-        handleMotionPreferenceChange
-      );
-    } else {
-      reducedMotionQuery.addListener(handleMotionPreferenceChange);
-    }
+    tickerViewport.addEventListener("pointerup", finishTickerDrag);
+    tickerViewport.addEventListener("pointercancel", finishTickerDrag);
 
-    window.addEventListener(
-      "resize",
-      () => {
-        if (!currentTickerText) {
-          return;
-        }
+    tickerViewport.addEventListener("focus", () => {
+      keyboardFocusedTicker = tickerViewport.matches(":focus-visible");
+      updateTickerPlayback();
+    });
 
-        window.clearTimeout(resizeTimer);
+    tickerViewport.addEventListener("blur", () => {
+      keyboardFocusedTicker = false;
+      updateTickerPlayback();
+    });
 
-        resizeTimer = window.setTimeout(() => {
-          renderTickerText(currentTickerText);
-        }, 150);
-      },
-      { passive: true }
-    );
+    tickerViewport.addEventListener("keydown", (event) => {
+      keyboardFocusedTicker = true;
+      updateTickerPlayback();
 
-    async function loadFooterContent() {
-      const container = document.querySelector("#footer-content");
+      const step = event.shiftKey ? 320 : 120;
 
-      try {
-        const response = await fetch("./footer-content.html", {
-          cache: "no-cache",
-        });
-
-        if (!response.ok) {
-          throw new Error(
-            `Could not load footer-content.html: ${response.status}`
-          );
-        }
-
-        const markup = await response.text();
-        const template = document.createElement("template");
-        template.innerHTML = markup;
-
-        container.replaceChildren(template.content.cloneNode(true));
-      } catch (error) {
-        console.error("Could not load the footer content:", error);
-
-        const message = document.createElement("p");
-        message.className = "footer-load-error";
-        message.textContent =
-          "Текст подвала не загрузился. Проверьте, что footer-content.html лежит рядом с index.html и сайт открыт через локальный сервер.";
-
-        container.replaceChildren(message);
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        moveTickerByPixels(step);
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        moveTickerByPixels(-step);
+      } else if (event.key === "PageDown") {
+        event.preventDefault();
+        moveTickerByPixels(tickerViewport.clientWidth * 0.8);
+      } else if (event.key === "PageUp") {
+        event.preventDefault();
+        moveTickerByPixels(-tickerViewport.clientWidth * 0.8);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        setTickerTime(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        setTickerTime(tickerDurationMs - 1);
       }
+    });
+
+    if (reducedMotionQuery.addEventListener) {
+      reducedMotionQuery.addEventListener("change", updateTickerPlayback);
     }
 
-    renderRandomStory();
-    loadFooterContent();
+    renderTickerCopy();
+
+    window.addEventListener("resize", () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(renderTickerCopy, 150);
+    });
   </script>
 </body>
 </html>
