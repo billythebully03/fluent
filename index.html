@@ -189,6 +189,7 @@
       padding-top: clamp(88px, 13vh, 140px);
     }
 
+    /* Бегущая строка */
     .ticker {
       --ticker-edge-width: clamp(58px, 11vw, 122px);
 
@@ -207,7 +208,6 @@
         #ffffff 100%
       );
 
-      /* Текст бегущей строки нельзя выделить. */
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
@@ -218,31 +218,22 @@
       z-index: 1;
       width: 100%;
       height: 52px;
-      overflow-x: auto;
-      overflow-y: hidden;
+      overflow: hidden;
       overscroll-behavior-x: none;
-      overscroll-behavior-inline: none;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      scroll-behavior: auto;
-      touch-action: pan-x pan-y;
+      touch-action: pan-y;
       cursor: grab;
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
     }
 
-    .ticker__viewport::-webkit-scrollbar {
-      display: none;
+    .ticker__viewport:focus-visible {
+      outline: 2px solid var(--apple-blue);
+      outline-offset: -2px;
     }
 
     .ticker__viewport.is-dragging {
       cursor: grabbing;
-    }
-
-    .ticker__viewport:focus-visible {
-      outline: 2px solid var(--apple-blue);
-      outline-offset: -2px;
     }
 
     .ticker__viewport,
@@ -258,6 +249,9 @@
       min-width: max-content;
       height: 100%;
       align-items: stretch;
+      animation: ticker-scroll var(--ticker-duration, 52s) linear infinite;
+      animation-play-state: running;
+      will-change: transform;
     }
 
     .ticker__group {
@@ -359,9 +353,31 @@
       left: auto;
     }
 
-    .ticker--static .ticker__track {
+    /* Текст неподвижен только во время загрузки или при reduced motion */
+    .ticker--static .ticker__track,
+    .ticker--reduced .ticker__track {
       animation: none;
       transform: none;
+    }
+
+    /* Автоматическая пауза при наведении и взаимодействии */
+    .ticker:hover .ticker__track,
+    .ticker:focus-within .ticker__track,
+    .ticker.is-paused .ticker__track {
+      animation-play-state: paused;
+    }
+
+    /* При системном reduced motion строку всё ещё можно прокручивать вручную */
+    .ticker--reduced .ticker__viewport {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      touch-action: pan-x pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ticker--reduced .ticker__viewport::-webkit-scrollbar {
+      display: none;
     }
 
     .footer-image {
@@ -370,6 +386,16 @@
       max-width: 100%;
       height: auto;
       margin-inline: auto;
+    }
+
+    @keyframes ticker-scroll {
+      from {
+        transform: translate3d(0, 0, 0);
+      }
+
+      to {
+        transform: translate3d(-50%, 0, 0);
+      }
     }
 
     @media (max-width: 1080px) {
@@ -644,18 +670,114 @@
       "(prefers-reduced-motion: reduce)"
     );
 
-    const AUTO_SCROLL_SPEED = 24;
+    const TICKER_SPEED = 24;
     const MIN_TICKER_CYCLE_WIDTH = 1180;
 
     let currentTickerText = "";
-    let tickerCycleWidth = 0;
-    let lastFrameTime = 0;
-    let resumeAutoScrollAt = 0;
+    let tickerAnimation = null;
     let pointerDrag = null;
+    let resumeTimer = null;
     let resizeTimer = null;
 
-    function pauseAutoScroll(duration = 2400) {
-      resumeAutoScrollAt = performance.now() + duration;
+    function getTickerAnimation() {
+      if (
+        tickerAnimation &&
+        tickerAnimation.effect &&
+        tickerAnimation.playState !== "finished"
+      ) {
+        return tickerAnimation;
+      }
+
+      tickerAnimation =
+        tickerTrack.getAnimations()[0] ?? null;
+
+      return tickerAnimation;
+    }
+
+    function getTickerAnimationTime() {
+      const animation = getTickerAnimation();
+
+      if (!animation || typeof animation.currentTime !== "number") {
+        return 0;
+      }
+
+      return animation.currentTime;
+    }
+
+    function shouldKeepTickerPaused() {
+      return (
+        ticker.matches(":hover") ||
+        ticker.contains(document.activeElement) ||
+        pointerDrag !== null
+      );
+    }
+
+    function pauseTicker() {
+      ticker.classList.add("is-paused");
+      getTickerAnimation()?.pause();
+    }
+
+    function resumeTickerIfAllowed() {
+      if (shouldKeepTickerPaused()) {
+        pauseTicker();
+        return;
+      }
+
+      ticker.classList.remove("is-paused");
+
+      if (!reducedMotionQuery.matches) {
+        getTickerAnimation()?.play();
+      }
+    }
+
+    function scheduleResumeIfIdle() {
+      window.clearTimeout(resumeTimer);
+
+      resumeTimer = window.setTimeout(() => {
+        if (!shouldKeepTickerPaused()) {
+          resumeTickerIfAllowed();
+        }
+      }, 1600);
+    }
+
+    function setTickerAnimationTime(time) {
+      const animation = getTickerAnimation();
+
+      if (!animation) {
+        return;
+      }
+
+      pauseTicker();
+      animation.currentTime = Math.max(0, time);
+    }
+
+    function changeTickerPositionByPixels(delta) {
+      if (!delta) {
+        return;
+      }
+
+      pauseTicker();
+
+      if (reducedMotionQuery.matches) {
+        const maxScroll = Math.max(
+          0,
+          tickerViewport.scrollWidth - tickerViewport.clientWidth
+        );
+
+        tickerViewport.scrollLeft = Math.min(
+          maxScroll,
+          Math.max(0, tickerViewport.scrollLeft + delta)
+        );
+
+        scheduleResumeIfIdle();
+        return;
+      }
+
+      const currentTime = getTickerAnimationTime();
+      const timeDelta = (delta / TICKER_SPEED) * 1000;
+
+      setTickerAnimationTime(currentTime + timeDelta);
+      scheduleResumeIfIdle();
     }
 
     function chooseStartingParagraph(paragraphCount) {
@@ -732,44 +854,62 @@
 
     function renderTickerText(text) {
       currentTickerText = text;
-      tickerCycleWidth = 0;
-      tickerViewport.scrollLeft = 0;
-      tickerTrack.replaceChildren();
+      tickerAnimation = null;
+
       ticker.classList.add("ticker--static");
+      ticker.classList.remove("ticker--reduced", "is-paused");
+      tickerTrack.replaceChildren();
+      tickerViewport.scrollLeft = 0;
 
       const firstGroup = createTickerGroup(text);
       tickerTrack.append(firstGroup);
 
       if (reducedMotionQuery.matches) {
+        ticker.classList.add("ticker--reduced");
         return;
       }
 
-      const targetWidth = Math.max(
-        tickerViewport.clientWidth,
-        MIN_TICKER_CYCLE_WIDTH
-      ) + 80;
+      const targetWidth =
+        Math.max(
+          tickerViewport.clientWidth + 100,
+          MIN_TICKER_CYCLE_WIDTH
+        );
 
       let copyCount = 1;
 
       while (
         firstGroup.scrollWidth < targetWidth &&
-        copyCount < 8
+        copyCount < 10
       ) {
         appendTickerCopy(firstGroup, text);
         copyCount += 1;
       }
 
-      const duplicateGroup = firstGroup.cloneNode(true);
-      duplicateGroup.setAttribute("aria-hidden", "true");
-      tickerTrack.append(duplicateGroup);
+      const secondGroup = firstGroup.cloneNode(true);
+      secondGroup.setAttribute("aria-hidden", "true");
+      tickerTrack.append(secondGroup);
+
+      const cycleWidth = firstGroup.getBoundingClientRect().width;
+      const durationSeconds = Math.max(
+        44,
+        cycleWidth / TICKER_SPEED
+      );
+
+      tickerTrack.style.setProperty(
+        "--ticker-duration",
+        `${durationSeconds.toFixed(2)}s`
+      );
 
       requestAnimationFrame(() => {
-        tickerCycleWidth = firstGroup.getBoundingClientRect().width;
+        ticker.classList.remove("ticker--static");
 
-        if (tickerCycleWidth > 0) {
-          tickerViewport.scrollLeft = 0;
-          ticker.classList.remove("ticker--static");
-        }
+        requestAnimationFrame(() => {
+          tickerAnimation = tickerTrack.getAnimations()[0] ?? null;
+
+          if (shouldKeepTickerPaused()) {
+            pauseTicker();
+          }
+        });
       });
     }
 
@@ -780,31 +920,8 @@
 
       const story = readingStories[storyIndex];
       const startIndex = chooseStartingParagraph(story.length);
-      const excerpt = makeExcerpt(story, startIndex);
 
-      renderTickerText(excerpt);
-    }
-
-    /*
-      Используется для колёсика, клавиатуры и перетаскивания.
-      Слева прокрутка останавливается на нуле — событие при этом
-      уже отменено, поэтому Safari не должен запускать жест «назад».
-    */
-    function setTickerScrollPosition(nextPosition) {
-      if (!Number.isFinite(nextPosition)) {
-        return;
-      }
-
-      if (nextPosition < 0) {
-        tickerViewport.scrollLeft = 0;
-        return;
-      }
-
-      if (tickerCycleWidth > 0 && nextPosition >= tickerCycleWidth) {
-        nextPosition %= tickerCycleWidth;
-      }
-
-      tickerViewport.scrollLeft = nextPosition;
+      renderTickerText(makeExcerpt(story, startIndex));
     }
 
     function normalizeWheelDelta(delta, event) {
@@ -820,12 +937,11 @@
     }
 
     function handleTickerWheel(event) {
-      const horizontalIntent =
-        event.shiftKey ||
-        Math.abs(event.deltaX) > Math.abs(event.deltaY);
+      const horizontalIntent = event.shiftKey
+        ? event.deltaY !== 0 || event.deltaX !== 0
+        : Math.abs(event.deltaX) > Math.abs(event.deltaY);
 
       if (!horizontalIntent) {
-        // Обычная вертикальная прокрутка страницы работает как прежде.
         return;
       }
 
@@ -839,151 +955,198 @@
 
       /*
         Перехватываем горизонтальный жест внутри строки.
-        Это важно на левом краю, где Safari может воспринимать
-        движение тачпада как переход на предыдущую страницу.
+        На левом краю положение ограничено нулём, поэтому жест
+        не передаётся странице и Safari не должен открывать «Назад».
       */
       if (event.cancelable) {
         event.preventDefault();
       }
 
       event.stopPropagation();
-      pauseAutoScroll();
 
-      const delta = normalizeWheelDelta(rawDelta, event);
-
-      setTickerScrollPosition(
-        tickerViewport.scrollLeft + delta
+      changeTickerPositionByPixels(
+        normalizeWheelDelta(rawDelta, event)
       );
     }
 
-    tickerViewport.addEventListener(
+    ticker.addEventListener(
       "wheel",
       handleTickerWheel,
-      { passive: false, capture: true }
+      { capture: true, passive: false }
     );
+
+    ticker.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse") {
+        pauseTicker();
+      }
+    });
+
+    ticker.addEventListener("pointerleave", (event) => {
+      if (event.pointerType === "mouse") {
+        requestAnimationFrame(resumeTickerIfAllowed);
+      }
+    });
+
+    tickerViewport.addEventListener("focusin", pauseTicker);
+
+    tickerViewport.addEventListener("focusout", () => {
+      requestAnimationFrame(resumeTickerIfAllowed);
+    });
 
     tickerViewport.addEventListener("keydown", (event) => {
       const step = Math.max(
-        80,
+        100,
         Math.round(tickerViewport.clientWidth * 0.18)
       );
 
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        setTickerScrollPosition(tickerViewport.scrollLeft + step);
-        pauseAutoScroll();
+        changeTickerPositionByPixels(step);
       } else if (event.key === "ArrowLeft") {
         event.preventDefault();
-        setTickerScrollPosition(tickerViewport.scrollLeft - step);
-        pauseAutoScroll();
+        changeTickerPositionByPixels(-step);
       } else if (event.key === "Home") {
         event.preventDefault();
-        tickerViewport.scrollLeft = 0;
-        pauseAutoScroll();
+
+        if (reducedMotionQuery.matches) {
+          tickerViewport.scrollLeft = 0;
+        } else {
+          setTickerAnimationTime(0);
+        }
       } else if (event.key === "End") {
         event.preventDefault();
-        setTickerScrollPosition(tickerCycleWidth || tickerViewport.scrollWidth);
-        pauseAutoScroll();
+
+        if (reducedMotionQuery.matches) {
+          tickerViewport.scrollLeft =
+            tickerViewport.scrollWidth -
+            tickerViewport.clientWidth;
+        } else {
+          const animation = getTickerAnimation();
+          const duration = Number(
+            animation?.effect?.getTiming().duration
+          );
+
+          if (Number.isFinite(duration)) {
+            setTickerAnimationTime(
+              getTickerAnimationTime() + duration
+            );
+          }
+        }
       }
     });
 
     tickerViewport.addEventListener("pointerdown", (event) => {
-      pauseAutoScroll();
-
-      if (event.pointerType === "touch") {
-        // На сенсорном экране остаётся доступна нативная прокрутка.
+      if (event.pointerType === "mouse" && event.button !== 0) {
         return;
       }
 
-      if (event.pointerType !== "mouse" || event.button !== 0) {
+      if (
+        event.pointerType !== "mouse" &&
+        event.pointerType !== "touch"
+      ) {
         return;
       }
 
-      event.preventDefault();
+      pauseTicker();
 
       pointerDrag = {
         pointerId: event.pointerId,
+        pointerType: event.pointerType,
         startX: event.clientX,
+        startY: event.clientY,
+        startAnimationTime: getTickerAnimationTime(),
         startScrollLeft: tickerViewport.scrollLeft,
+        mode: event.pointerType === "mouse"
+          ? "dragging"
+          : "pending",
       };
 
-      tickerViewport.classList.add("is-dragging");
-      tickerViewport.setPointerCapture(event.pointerId);
-    });
-
-    tickerViewport.addEventListener("pointermove", (event) => {
-      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
-        return;
+      if (event.pointerType === "mouse") {
+        event.preventDefault();
+        tickerViewport.classList.add("is-dragging");
+        tickerViewport.setPointerCapture(event.pointerId);
       }
-
-      event.preventDefault();
-
-      const deltaX = event.clientX - pointerDrag.startX;
-
-      setTickerScrollPosition(
-        pointerDrag.startScrollLeft - deltaX
-      );
     });
+
+    tickerViewport.addEventListener(
+      "pointermove",
+      (event) => {
+        if (
+          !pointerDrag ||
+          pointerDrag.pointerId !== event.pointerId
+        ) {
+          return;
+        }
+
+        const deltaX = event.clientX - pointerDrag.startX;
+        const deltaY = event.clientY - pointerDrag.startY;
+
+        if (pointerDrag.mode === "pending") {
+          if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 6) {
+            return;
+          }
+
+          // Не мешаем обычной вертикальной прокрутке страницы.
+          if (Math.abs(deltaY) > Math.abs(deltaX)) {
+            pointerDrag = null;
+            resumeTickerIfAllowed();
+            return;
+          }
+
+          pointerDrag.mode = "dragging";
+          tickerViewport.classList.add("is-dragging");
+        }
+
+        if (pointerDrag.mode !== "dragging") {
+          return;
+        }
+
+        event.preventDefault();
+
+        if (reducedMotionQuery.matches) {
+          const maxScroll = Math.max(
+            0,
+            tickerViewport.scrollWidth -
+              tickerViewport.clientWidth
+          );
+
+          tickerViewport.scrollLeft = Math.min(
+            maxScroll,
+            Math.max(
+              0,
+              pointerDrag.startScrollLeft - deltaX
+            )
+          );
+
+          return;
+        }
+
+        const timeDelta =
+          ((-deltaX) / TICKER_SPEED) * 1000;
+
+        setTickerAnimationTime(
+          pointerDrag.startAnimationTime + timeDelta
+        );
+      },
+      { passive: false }
+    );
 
     function finishPointerDrag(event) {
-      if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) {
+      if (
+        !pointerDrag ||
+        pointerDrag.pointerId !== event.pointerId
+      ) {
         return;
       }
 
       pointerDrag = null;
       tickerViewport.classList.remove("is-dragging");
-      pauseAutoScroll(2200);
+
+      requestAnimationFrame(resumeTickerIfAllowed);
     }
 
     tickerViewport.addEventListener("pointerup", finishPointerDrag);
     tickerViewport.addEventListener("pointercancel", finishPointerDrag);
-
-    tickerViewport.addEventListener("focusin", () => {
-      pauseAutoScroll();
-    });
-
-    tickerViewport.addEventListener("focusout", () => {
-      pauseAutoScroll(1800);
-    });
-
-    function tickerAnimationFrame(timestamp) {
-      if (!lastFrameTime) {
-        lastFrameTime = timestamp;
-      }
-
-      const elapsedSeconds = Math.min(
-        (timestamp - lastFrameTime) / 1000,
-        0.05
-      );
-
-      lastFrameTime = timestamp;
-
-      const pointerIsOverTicker = ticker.matches(":hover");
-      const tickerHasKeyboardFocus = ticker.contains(
-        document.activeElement
-      );
-
-      const shouldAutoScroll =
-        !reducedMotionQuery.matches &&
-        !ticker.classList.contains("ticker--static") &&
-        document.visibilityState === "visible" &&
-        !pointerIsOverTicker &&
-        !tickerHasKeyboardFocus &&
-        !pointerDrag &&
-        timestamp >= resumeAutoScrollAt;
-
-      if (shouldAutoScroll) {
-        setTickerScrollPosition(
-          tickerViewport.scrollLeft +
-          AUTO_SCROLL_SPEED * elapsedSeconds
-        );
-      } else if (tickerViewport.scrollLeft < 0) {
-        // На случай отрицательного overscroll в браузерах WebKit.
-        tickerViewport.scrollLeft = 0;
-      }
-
-      requestAnimationFrame(tickerAnimationFrame);
-    }
 
     function handleMotionPreferenceChange() {
       if (currentTickerText) {
@@ -1017,7 +1180,6 @@
     );
 
     renderRandomStory();
-    requestAnimationFrame(tickerAnimationFrame);
   </script>
 </body>
 </html>
