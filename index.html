@@ -13,10 +13,12 @@
       color-scheme: light;
 
       --background: #ffffff;
+      --surface-soft: #f5f5f7;
       --text-primary: #1d1d1f;
       --text-secondary: #6e6e73;
       --text-menu: rgba(29, 29, 31, 0.7);
       --apple-blue: #0071e3;
+      --subtle-border: rgba(29, 29, 31, 0.1);
 
       --content-width: 1100px;
     }
@@ -58,6 +60,10 @@
       user-select: none;
     }
 
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
     .page-shell {
       display: flex;
       flex-direction: column;
@@ -65,7 +71,7 @@
       min-height: 100vh;
       min-height: 100svh;
       margin-inline: auto;
-      padding-block: 88px 42px;
+      padding-top: 88px;
     }
 
     .site-main {
@@ -166,7 +172,8 @@
       opacity: 0.55;
     }
 
-    .menu-link:focus-visible {
+    .menu-link:focus-visible,
+    .menu-note__link:focus-visible {
       outline: 2px solid var(--apple-blue);
       outline-offset: 4px;
       border-radius: 2px;
@@ -183,10 +190,9 @@
       line-height: 1;
     }
 
-    /* Короткая заметка вместо списка пунктов */
     .menu-note {
+      max-width: 150px;
       margin: 0;
-      max-width: 160px;
       color: var(--text-menu);
       font-size: 13px;
       font-weight: 400;
@@ -207,16 +213,14 @@
       color: var(--text-primary);
     }
 
-    .menu-note__link:focus-visible {
-      outline: 2px solid var(--apple-blue);
-      outline-offset: 2px;
-      border-radius: 2px;
-    }
-
-    .site-footer {
+    /*
+      Нижняя графическая часть страницы остаётся на белом фоне:
+      бегущая строка и decorative image выровнены по ширине контента.
+    */
+    .page-end {
       width: 100%;
       margin-top: auto;
-      padding-top: clamp(88px, 13vh, 140px);
+      padding-block: clamp(88px, 13vh, 140px) 42px;
     }
 
     /* Бегущая строка */
@@ -233,11 +237,10 @@
       background: linear-gradient(
         to right,
         #ffffff 0%,
-        #f5f5f7 11%,
-        #f5f5f7 89%,
+        var(--surface-soft) 11%,
+        var(--surface-soft) 89%,
         #ffffff 100%
       );
-
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
@@ -425,6 +428,159 @@
       }
     }
 
+    /* Подвал */
+    .site-footer {
+      width: 100%;
+      background: var(--surface-soft);
+      color: var(--text-primary);
+    }
+
+    .site-footer__inner {
+      width: min(var(--content-width), calc(100% - 80px));
+      margin-inline: auto;
+      padding-block: 72px 30px;
+    }
+
+    .footer-content {
+      min-height: 280px;
+    }
+
+    .footer-loading,
+    .footer-load-error {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .footer-intro {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(40px, 7vw, 88px);
+      align-items: end;
+      padding-bottom: 38px;
+      border-bottom: 1px solid var(--subtle-border);
+    }
+
+    .footer-eyebrow {
+      margin: 0 0 15px;
+      color: #86868b;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .footer-title {
+      max-width: 520px;
+      margin: 0;
+      color: var(--text-primary);
+      font-size: clamp(30px, 4vw, 43px);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.045em;
+    }
+
+    .footer-intro__lead {
+      max-width: 540px;
+      margin: 0;
+      color: #515154;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.7;
+      letter-spacing: -0.012em;
+    }
+
+    .footer-articles {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: clamp(36px, 6vw, 76px);
+      row-gap: 0;
+      padding-top: 8px;
+    }
+
+    .footer-article {
+      padding-block: 25px 26px;
+      border-bottom: 1px solid var(--subtle-border);
+    }
+
+    .footer-article h3 {
+      margin: 0 0 10px;
+      color: #2d2d30;
+      font-size: 16px;
+      font-weight: 550;
+      line-height: 1.4;
+      letter-spacing: -0.02em;
+    }
+
+    .footer-article p {
+      margin: 0;
+      color: #626267;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.72;
+      letter-spacing: -0.005em;
+    }
+
+    .footer-article p + p {
+      margin-top: 9px;
+    }
+
+    .footer-outro {
+      max-width: 760px;
+      margin: 32px 0 0;
+      color: #515154;
+      font-size: 15px;
+      line-height: 1.7;
+      letter-spacing: -0.01em;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: center;
+      margin-top: 42px;
+      padding-top: 24px;
+      border-top: 1px solid var(--subtle-border);
+    }
+
+    .back-to-top {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 38px;
+      padding: 8px 15px;
+      border: 1px solid rgba(29, 29, 31, 0.13);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.54);
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1;
+      text-decoration: none;
+      transition:
+        color 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .back-to-top:hover {
+      border-color: rgba(29, 29, 31, 0.22);
+      background: #ffffff;
+      color: var(--text-primary);
+    }
+
+    .back-to-top:focus-visible {
+      outline: 2px solid var(--apple-blue);
+      outline-offset: 3px;
+    }
+
+    .back-to-top__icon {
+      display: block;
+      width: 14px;
+      height: 14px;
+      flex: none;
+    }
+
     @media (max-width: 1080px) {
       .page-shell {
         width: min(920px, calc(100% - 64px));
@@ -446,10 +602,26 @@
       }
     }
 
+    @media (max-width: 760px) {
+      .footer-intro {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+      }
+
+      .footer-title {
+        max-width: 600px;
+      }
+
+      .footer-intro__lead {
+        max-width: 620px;
+      }
+    }
+
     @media (max-width: 640px) {
       .page-shell {
         width: calc(100% - 40px);
-        padding-block: 38px 26px;
+        padding-top: 38px;
       }
 
       .site-main {
@@ -471,8 +643,8 @@
         font-size: 16px;
       }
 
-      .site-footer {
-        padding-top: 84px;
+      .page-end {
+        padding-block: 84px 26px;
       }
 
       .ticker {
@@ -483,21 +655,57 @@
         gap: 14px;
         padding-inline: 18px;
       }
+
+      .site-footer__inner {
+        width: calc(100% - 40px);
+        padding-block: 48px 24px;
+      }
+
+      .footer-title {
+        font-size: 32px;
+      }
+
+      .footer-intro {
+        padding-bottom: 28px;
+      }
+
+      .footer-articles {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .footer-article {
+        padding-block: 21px 22px;
+      }
+
+      .footer-outro {
+        margin-top: 25px;
+      }
+
+      .footer-bottom {
+        margin-top: 32px;
+        padding-top: 20px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .ticker__edge {
         display: none;
       }
+
+      .back-to-top,
+      .menu-link,
+      .menu-note__link {
+        transition: none;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="page-shell">
-    <main class="site-main" id="top">
+  <div class="page-shell" id="top">
+    <main class="site-main">
       <section class="brand-block" aria-label="О Fluent">
-        <a class="brand" href="./" aria-label="Fluent — главная страница">
+        <a class="brand" href="#top" aria-label="Fluent — главная страница">
           <img
             class="brand-logo"
             src="./public/fluent.png"
@@ -519,7 +727,7 @@
       ></nav>
     </main>
 
-    <footer class="site-footer">
+    <div class="page-end">
       <section
         class="ticker ticker--static"
         id="reading-ticker"
@@ -556,19 +764,46 @@
 
       <img
         class="footer-image"
-        src="./public/footer.png?v=7"
+        src="./public/footer.png?v=8"
         alt=""
         draggable="false"
       />
-    </footer>
+    </div>
   </div>
+
+  <footer class="site-footer" aria-label="О проекте Fluent">
+    <div class="site-footer__inner">
+      <div class="footer-content" id="footer-content">
+        <p class="footer-loading">Загружаем заметку о Fluent…</p>
+      </div>
+
+      <div class="footer-bottom">
+        <a class="back-to-top" href="#top">
+          <svg
+            class="back-to-top__icon"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M8 13V3M4.5 6.5 8 3l3.5 3.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>Вернуть наверх</span>
+        </a>
+      </div>
+    </div>
+  </footer>
 
   <script>
     const practiceItems = [
-      "Заглушка",
-      "Ещё одна",
-      "Заглушка",
-      "Ещё одна",
+      "Слова",
+      "Идиомы",
+      "Ситуации",
     ];
 
     const accountItems = [
@@ -603,11 +838,14 @@
         title: "Награды",
         note: [
           {
-            text: "Награды можно получить за разные активности, если интересно, ",
+            text: "Награды можно получить за разные активности. Если интересно, ",
           },
           {
             text: "ознакомься подробнее",
-            href: "./",
+            href: "#top",
+          },
+          {
+            text: ".",
           },
         ],
       },
@@ -661,7 +899,7 @@
         const link = document.createElement("a");
 
         link.className = "menu-link";
-        link.href = entry.href || "./";
+        link.href = entry.href || "#top";
 
         if (entry.external) {
           link.target = "_blank";
@@ -689,6 +927,11 @@
       navigation.append(group);
     });
 
+    /*
+      Оригинальные короткие истории для прототипа.
+      При загрузке выбирается случайная история и обычно
+      второй или третий абзац.
+    */
     const readingStories = [
       [
         "When Maya moved to a new city, she decided to walk home from work instead of taking the bus.",
@@ -733,28 +976,19 @@
     let resizeTimer = null;
 
     function getTickerAnimation() {
-      if (
-        tickerAnimation &&
-        tickerAnimation.effect &&
-        tickerAnimation.playState !== "finished"
-      ) {
+      if (tickerAnimation && tickerAnimation.effect) {
         return tickerAnimation;
       }
 
-      tickerAnimation =
-        tickerTrack.getAnimations()[0] ?? null;
-
+      tickerAnimation = tickerTrack.getAnimations()[0] ?? null;
       return tickerAnimation;
     }
 
     function getTickerAnimationTime() {
       const animation = getTickerAnimation();
+      const time = Number(animation?.currentTime);
 
-      if (!animation || typeof animation.currentTime !== "number") {
-        return 0;
-      }
-
-      return animation.currentTime;
+      return Number.isFinite(time) ? time : 0;
     }
 
     function shouldKeepTickerPaused() {
@@ -907,8 +1141,12 @@
 
     function renderTickerText(text) {
       currentTickerText = text;
-      tickerAnimation = null;
 
+      tickerTrack.getAnimations().forEach((animation) => {
+        animation.cancel();
+      });
+
+      tickerAnimation = null;
       ticker.classList.add("ticker--static");
       ticker.classList.remove("ticker--reduced", "is-paused");
       tickerTrack.replaceChildren();
@@ -922,11 +1160,10 @@
         return;
       }
 
-      const targetWidth =
-        Math.max(
-          tickerViewport.clientWidth + 100,
-          MIN_TICKER_CYCLE_WIDTH
-        );
+      const targetWidth = Math.max(
+        tickerViewport.clientWidth + 100,
+        MIN_TICKER_CYCLE_WIDTH
+      );
 
       let copyCount = 1;
 
@@ -1006,6 +1243,10 @@
         return;
       }
 
+      /*
+        Горизонтальный жест обрабатывается здесь, включая левый край.
+        За пределы строки скролл не передаётся.
+      */
       if (event.cancelable) {
         event.preventDefault();
       }
@@ -1076,7 +1317,7 @@
 
           if (Number.isFinite(duration)) {
             setTickerAnimationTime(
-              getTickerAnimationTime() + duration
+              getTickerAnimationTime() + duration / 2
             );
           }
         }
@@ -1099,7 +1340,6 @@
 
       pointerDrag = {
         pointerId: event.pointerId,
-        pointerType: event.pointerType,
         startX: event.clientX,
         startY: event.clientY,
         startAnimationTime: getTickerAnimationTime(),
@@ -1134,6 +1374,7 @@
             return;
           }
 
+          /* Не мешаем вертикальному скроллу страницы на телефоне. */
           if (Math.abs(deltaY) > Math.abs(deltaX)) {
             pointerDrag = null;
             resumeTickerIfAllowed();
@@ -1168,8 +1409,7 @@
           return;
         }
 
-        const timeDelta =
-          ((-deltaX) / TICKER_SPEED) * 1000;
+        const timeDelta = (-deltaX / TICKER_SPEED) * 1000;
 
         setTickerAnimationTime(
           pointerDrag.startAnimationTime + timeDelta
@@ -1226,7 +1466,39 @@
       { passive: true }
     );
 
+    async function loadFooterContent() {
+      const container = document.querySelector("#footer-content");
+
+      try {
+        const response = await fetch("./footer-content.html", {
+          cache: "no-cache",
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Could not load footer-content.html: ${response.status}`
+          );
+        }
+
+        const markup = await response.text();
+        const template = document.createElement("template");
+        template.innerHTML = markup;
+
+        container.replaceChildren(template.content.cloneNode(true));
+      } catch (error) {
+        console.error("Could not load the footer content:", error);
+
+        const message = document.createElement("p");
+        message.className = "footer-load-error";
+        message.textContent =
+          "Текст подвала не загрузился. Проверьте, что footer-content.html лежит рядом с index.html и сайт открыт через локальный сервер.";
+
+        container.replaceChildren(message);
+      }
+    }
+
     renderRandomStory();
+    loadFooterContent();
   </script>
 </body>
 </html>
