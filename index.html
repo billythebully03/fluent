@@ -183,6 +183,36 @@
       line-height: 1;
     }
 
+    /* Короткая заметка вместо списка пунктов */
+    .menu-note {
+      margin: 0;
+      max-width: 160px;
+      color: var(--text-menu);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.55;
+      letter-spacing: -0.01em;
+    }
+
+    .menu-note__link {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      transition: color 160ms ease;
+    }
+
+    .menu-note__link:hover {
+      color: var(--text-primary);
+    }
+
+    .menu-note__link:focus-visible {
+      outline: 2px solid var(--apple-blue);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     .site-footer {
       width: 100%;
       margin-top: auto;
@@ -353,21 +383,18 @@
       left: auto;
     }
 
-    /* Текст неподвижен только во время загрузки или при reduced motion */
     .ticker--static .ticker__track,
     .ticker--reduced .ticker__track {
       animation: none;
       transform: none;
     }
 
-    /* Автоматическая пауза при наведении и взаимодействии */
     .ticker:hover .ticker__track,
     .ticker:focus-within .ticker__track,
     .ticker.is-paused .ticker__track {
       animation-play-state: paused;
     }
 
-    /* При системном reduced motion строку всё ещё можно прокручивать вручную */
     .ticker--reduced .ticker__viewport {
       overflow-x: auto;
       overflow-y: hidden;
@@ -544,15 +571,9 @@
       "Ещё одна",
     ];
 
-    const optionsItems = [
-      "Заглушка",
-      "Ещё одна",
-      "Заглушка",
-    ];
-
-    const rewardsItems = [
-      "Заглушка",
-      "Ещё одна",
+    const accountItems = [
+      "Мои интересы",
+      "Сохранённые",
     ];
 
     const socialItems = [
@@ -577,8 +598,19 @@
 
     const menuColumns = [
       { title: "Практика", items: practiceItems },
-      { title: "Опции", items: optionsItems },
-      { title: "Награды", items: rewardsItems },
+      { title: "Аккаунт", items: accountItems },
+      {
+        title: "Награды",
+        note: [
+          {
+            text: "Награды можно получить за разные активности, если интересно, ",
+          },
+          {
+            text: "ознакомься подробнее",
+            href: "./",
+          },
+        ],
+      },
       { title: "Соушл", items: socialItems },
       { title: "API", items: apiItems },
     ];
@@ -595,6 +627,27 @@
       heading.textContent = column.title;
 
       group.setAttribute("aria-labelledby", heading.id);
+
+      if (column.note) {
+        const note = document.createElement("p");
+        note.className = "menu-note";
+
+        column.note.forEach((segment) => {
+          if (segment.href) {
+            const link = document.createElement("a");
+            link.className = "menu-note__link";
+            link.href = segment.href;
+            link.textContent = segment.text;
+            note.append(link);
+          } else {
+            note.append(document.createTextNode(segment.text));
+          }
+        });
+
+        group.append(heading, note);
+        navigation.append(group);
+        return;
+      }
 
       const list = document.createElement("ul");
       list.className = "menu-list";
@@ -953,11 +1006,6 @@
         return;
       }
 
-      /*
-        Перехватываем горизонтальный жест внутри строки.
-        На левом краю положение ограничено нулём, поэтому жест
-        не передаётся странице и Safari не должен открывать «Назад».
-      */
       if (event.cancelable) {
         event.preventDefault();
       }
@@ -1086,7 +1134,6 @@
             return;
           }
 
-          // Не мешаем обычной вертикальной прокрутке страницы.
           if (Math.abs(deltaY) > Math.abs(deltaX)) {
             pointerDrag = null;
             resumeTickerIfAllowed();
